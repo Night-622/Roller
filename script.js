@@ -84,6 +84,16 @@ var serverList = [
 		storageBucket: "car-game-backup-7.appspot.com",
 		messagingSenderId: "1012238241918",
 		appId: "1:1012238241918:web:d4188393dcd596b6a6882f"
+	},
+	{
+		apiKey: "AIzaSyCJHdK7KfqvyQ-gwvVbSNE69PHSDnWvXpo",
+		authDomain: "github-racing.firebaseapp.com",
+		databaseURL: "https://github-racing-default-rtdb.asia-southeast1.firebasedatabase.app",
+		projectId: "github-racing",
+		storageBucket: "github-racing.firebasestorage.app",
+		messagingSenderId: "979171326010",
+		appId: "1:979171326010:web:25b60c1cbd2d1017f49d03",
+		measurementId: "G-JF1TMMQ2NQ"
 	}
 ];
 
