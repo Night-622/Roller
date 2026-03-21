@@ -2,12 +2,12 @@ var SPEED = 0.005;
 var CAMERA_LAG = 0.9;
 var COLLISION = 1.1;
 var BOUNCE = 0.5;
-var mapscale = 5;
+var mapscale = 3;
 var VR = false;
 var BOUNCE_CORRECT = 0.01;
 var WALL_SIZE = 1.2;
-var MOUNTAIN_DIST = 1150;
-var OOB_DIST = 1100;
+var MOUNTAIN_DIST = 950;
+var OOB_DIST = 900;
 var LAPS = 5;
 
 // Boost settings
