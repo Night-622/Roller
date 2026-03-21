@@ -24,6 +24,16 @@ function MODS(){
 
 var serverList = [
 	{
+		apiKey: "AIzaSyCJHdK7KfqvyQ-gwvVbSNE69PHSDnWvXpo",
+		authDomain: "github-racing.firebaseapp.com",
+		databaseURL: "https://github-racing-default-rtdb.asia-southeast1.firebasedatabase.app",
+		projectId: "github-racing",
+		storageBucket: "github-racing.firebasestorage.app",
+		messagingSenderId: "979171326010",
+		appId: "1:979171326010:web:25b60c1cbd2d1017f49d03",
+		measurementId: "G-JF1TMMQ2NQ"
+	},
+	{
 		apiKey: "AIzaSyDiJsMLlix5o9XqPW1EpeBvuA15XNjlR8M",
 		authDomain: "car-game-a86b9.firebaseapp.com",
 		databaseURL: "https://car-game-a86b9.firebaseio.com",
@@ -108,7 +118,7 @@ for(var i = 0; i < serverList.length; i++){
 	}
     	let tm = setTimeout(function(){
     	    la.delete();
-    	}, 15000);
+    	}, 5000);
 	la.auth().signInAnonymously().then(() => {
 		database = la.database();
 		database.ref("/testServer").once("value", function(e){
