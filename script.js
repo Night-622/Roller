@@ -5,7 +5,7 @@ var BOUNCE = 0.5;
 var mapscale = 1;
 var VR = false;
 var BOUNCE_CORRECT = 0.01;
-var WALL_SIZE = 3.2;
+var WALL_SIZE = 30.2;
 var MOUNTAIN_DIST = 750;
 var OOB_DIST = 700;
 var LAPS = 3;
@@ -16,8 +16,8 @@ var BOOST_RECHARGE_TIME = 8000;  // Time in ms to recharge from 0 to 100%
 var BOOST_DRAIN_TIME = 3000;     // Time in ms to drain from 100% to 0% while holding shift
 
 // Brake settings
-var BRAKE_POWER = 0.09;
-var BRAKE_REVERSE = 0.00009;
+var BRAKE_POWER = 2;
+var BRAKE_REVERSE = 0.9;
 function MODS(){
 
 }
