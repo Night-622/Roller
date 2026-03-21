@@ -9,6 +9,15 @@ var WALL_SIZE = 1.2;
 var MOUNTAIN_DIST = 250;
 var OOB_DIST = 200;
 var LAPS = 3;
+
+// Boost settings
+var BOOST_STRENGTH = 0.012;
+var BOOST_DURATION = 3000;
+var BOOST_COOLDOWN = 5000;
+
+// Brake settings
+var BRAKE_POWER = 0.88;
+var BRAKE_REVERSE = 0.0008;
 function MODS(){
 
 }
@@ -297,7 +306,7 @@ function toggleFullScreen() {
 	window.scrollTo(0,1);
 }
 
-var name, code, players = {}, me = {}, gameStarted = false, gameSortaStarted = false, left = false, right = false, lap;
+var name, code, players = {}, me = {}, gameStarted = false, gameSortaStarted = false, left = false, right = false, boost = false, braking = false, boostActive = false, boostEndTime = 0, boostCooldownEnd = 0, lap;
 var carPos = [
 	{x: 0, y: 0},
 	{x: 2, y: 0},
@@ -761,11 +770,24 @@ function join(){
 
 					play.data.dir += play.data.steer / 10 * warp;
 
-					play.data.xv += Math.sin(play.data.dir) * SPEED * warp;
-					play.data.yv += Math.cos(play.data.dir) * SPEED * warp;
+					// Check boost expiry
+					if(boostActive && Date.now() > boostEndTime) boostActive = false;
 
-					play.data.xv *= Math.pow(0.99, warp);
-					play.data.yv *= Math.pow(0.99, warp);
+					var currentSpeed = (play == players[me.ref.path.pieces_[2]] && boostActive)
+						? SPEED + BOOST_STRENGTH : SPEED;
+
+					play.data.xv += Math.sin(play.data.dir) * currentSpeed * warp;
+					play.data.yv += Math.cos(play.data.dir) * currentSpeed * warp;
+
+					if(play == players[me.ref.path.pieces_[2]] && braking){
+						play.data.xv *= Math.pow(BRAKE_POWER, warp);
+						play.data.yv *= Math.pow(BRAKE_POWER, warp);
+						play.data.xv -= Math.sin(play.data.dir) * BRAKE_REVERSE * warp;
+						play.data.yv -= Math.cos(play.data.dir) * BRAKE_REVERSE * warp;
+					} else {
+						play.data.xv *= Math.pow(0.99, warp);
+						play.data.yv *= Math.pow(0.99, warp);
+					}
 
 					play.data.x += play.data.xv * warp;
 					play.data.y += play.data.yv * warp;
@@ -1151,17 +1173,22 @@ function startGame(){
 }
 
 window.onkeydown = function(e){
-	if(e.keyCode == 37)
-		left = true;
-	if(e.keyCode == 39)
-		right = true;
+	if(e.keyCode == 37) left = true;
+	if(e.keyCode == 39) right = true;
+	if(e.keyCode == 16){
+		if(!boostActive && Date.now() > boostCooldownEnd){
+			boostActive = true;
+			boostEndTime = Date.now() + BOOST_DURATION;
+			boostCooldownEnd = Date.now() + BOOST_DURATION + BOOST_COOLDOWN;
+		}
+	}
+	if(e.keyCode == 32){ braking = true; e.preventDefault(); }
 }
 
 window.onkeyup = function(e){
-	if(e.keyCode == 37)
-		left = false;
-	if(e.keyCode == 39)
-		right = false;
+	if(e.keyCode == 37) left = false;
+	if(e.keyCode == 39) right = false;
+	if(e.keyCode == 32) braking = false;
 }
 
 if(mobile){
