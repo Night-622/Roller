@@ -12,6 +12,6 @@ add these through ctrl i paste or add to end of custom map code
   
   MOUNTAIN_DIST=325 distance of mountains from spawn
   
-  OOB_DIST=300 length between walls
+  OOB_DIST=300 out of bounds system
   
   LAPS=10 laps raced
