@@ -1,13 +1,13 @@
-var SPEED = 0.005;
+var SPEED = 0.006;
 var CAMERA_LAG = 0.9;
 var COLLISION = 1.1;
 var BOUNCE = 0.5;
-var mapscale = 3;
+var mapscale = 2;
 var VR = false;
 var BOUNCE_CORRECT = 0.01;
 var WALL_SIZE = 1.2;
-var MOUNTAIN_DIST = 950;
-var OOB_DIST = 900;
+var MOUNTAIN_DIST = 750;
+var OOB_DIST = 700;
 var LAPS = 5;
 
 // Boost settings
@@ -16,8 +16,8 @@ var BOOST_RECHARGE_TIME = 8000;  // Time in ms to recharge from 0 to 100%
 var BOOST_DRAIN_TIME = 3000;     // Time in ms to drain from 100% to 0% while holding shift
 
 // Brake settings
-var BRAKE_POWER = 0.44;
-var BRAKE_REVERSE = 0.0004;
+var BRAKE_POWER = 0.99;
+var BRAKE_REVERSE = 0.0009;
 function MODS(){
 
 }
