@@ -2,7 +2,7 @@ var SPEED = 0.005;
 var CAMERA_LAG = 0.9;
 var COLLISION = 1.1;
 var BOUNCE = 0.5;
-var mapscale = 5;
+var mapscale = 4;
 var VR = false;
 var BOUNCE_CORRECT = 0.01;
 var WALL_SIZE = 1.2;
@@ -23,16 +23,6 @@ function MODS(){
 }
 
 var serverList = [
-	{
-		apiKey: "AIzaSyCJHdK7KfqvyQ-gwvVbSNE69PHSDnWvXpo",
-		authDomain: "github-racing.firebaseapp.com",
-		databaseURL: "https://github-racing-default-rtdb.asia-southeast1.firebasedatabase.app",
-		projectId: "github-racing",
-		storageBucket: "github-racing.firebasestorage.app",
-		messagingSenderId: "979171326010",
-		appId: "1:979171326010:web:25b60c1cbd2d1017f49d03",
-		measurementId: "G-JF1TMMQ2NQ"
-	},
 	{
 		apiKey: "AIzaSyDiJsMLlix5o9XqPW1EpeBvuA15XNjlR8M",
 		authDomain: "car-game-a86b9.firebaseapp.com",
