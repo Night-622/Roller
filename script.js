@@ -11,9 +11,9 @@ var OOB_DIST = 200;
 var LAPS = 3;
 
 // Boost settings
-var BOOST_STRENGTH = 0.012;
-var BOOST_DURATION = 3000;
-var BOOST_COOLDOWN = 5000;
+var BOOST_STRENGTH = 0.012;      // Extra speed while boosting
+var BOOST_RECHARGE_TIME = 5000;  // Time in ms to recharge from 0 to 100%
+var BOOST_DRAIN_TIME = 3000;     // Time in ms to drain from 100% to 0% while holding shift
 
 // Brake settings
 var BRAKE_POWER = 0.88;
@@ -306,7 +306,7 @@ function toggleFullScreen() {
 	window.scrollTo(0,1);
 }
 
-var name, code, players = {}, me = {}, gameStarted = false, gameSortaStarted = false, left = false, right = false, boost = false, braking = false, boostActive = false, boostEndTime = 0, boostCooldownEnd = 0, lap;
+var name, code, players = {}, me = {}, gameStarted = false, gameSortaStarted = false, left = false, right = false, braking = false, boostHeld = false, boostTank = 100, lap;
 var carPos = [
 	{x: 0, y: 0},
 	{x: 2, y: 0},
@@ -497,6 +497,16 @@ host = function(){
 						lap.className = "title";
 						lap.id = "lap";
 						f.appendChild(lap);
+
+						// Boost bar UI
+						var boostContainer = document.createElement("DIV");
+						boostContainer.id = "boostcontainer";
+						boostContainer.style.cssText = "position:absolute;bottom:20px;left:50%;transform:translateX(-50%);width:200px;background:rgba(0,0,0,0.5);border:2px solid white;border-radius:10px;overflow:hidden;height:16px;";
+						var boostBar = document.createElement("DIV");
+						boostBar.id = "boostbar";
+						boostBar.style.cssText = "width:100%;height:100%;background:linear-gradient(90deg,#f4d03f,#e67e22);transition:width 0.05s;border-radius:8px;";
+						boostContainer.appendChild(boostBar);
+						f.appendChild(boostContainer);
 
 						setTimeout(function(){
 							countDown.innerHTML = "2";
@@ -770,16 +780,27 @@ function join(){
 
 					play.data.dir += play.data.steer / 10 * warp;
 
-					// Check boost expiry
-					if(boostActive && Date.now() > boostEndTime) boostActive = false;
+					// Boost tank logic (only for local player)
+					if(play == players[me.ref.path.pieces_[2]]){
+						if(boostHeld && boostTank > 0){
+							boostTank -= (100 / BOOST_DRAIN_TIME) * timepassed;
+							if(boostTank < 0) boostTank = 0;
+						} else if(!boostHeld && boostTank < 100){
+							boostTank += (100 / BOOST_RECHARGE_TIME) * timepassed;
+							if(boostTank > 100) boostTank = 100;
+						}
+						// Update boost bar UI
+						var bar = document.getElementById("boostbar");
+						if(bar) bar.style.width = boostTank + "%";
+					}
 
-					var currentSpeed = (play == players[me.ref.path.pieces_[2]] && boostActive)
-						? SPEED + BOOST_STRENGTH : SPEED;
+					var isBoosting = (play == players[me.ref.path.pieces_[2]] && boostHeld && boostTank > 0);
+					var currentSpeed = isBoosting ? SPEED + BOOST_STRENGTH : SPEED;
 
 					play.data.xv += Math.sin(play.data.dir) * currentSpeed * warp;
 					play.data.yv += Math.cos(play.data.dir) * currentSpeed * warp;
 
-					if(play == players[me.ref.path.pieces_[2]] && braking){
+					if(play == players[me.ref.path.pieces_[2]] && braking && !isBoosting){
 						play.data.xv *= Math.pow(BRAKE_POWER, warp);
 						play.data.yv *= Math.pow(BRAKE_POWER, warp);
 						play.data.xv -= Math.sin(play.data.dir) * BRAKE_REVERSE * warp;
@@ -1135,6 +1156,16 @@ codeCheck = function(){
 						lap.id = "lap";
 						f.appendChild(lap);
 
+						// Boost bar UI
+						var boostContainer = document.createElement("DIV");
+						boostContainer.id = "boostcontainer";
+						boostContainer.style.cssText = "position:absolute;bottom:20px;left:50%;transform:translateX(-50%);width:200px;background:rgba(0,0,0,0.5);border:2px solid white;border-radius:10px;overflow:hidden;height:16px;";
+						var boostBar = document.createElement("DIV");
+						boostBar.id = "boostbar";
+						boostBar.style.cssText = "width:100%;height:100%;background:linear-gradient(90deg,#f4d03f,#e67e22);transition:width 0.05s;border-radius:8px;";
+						boostContainer.appendChild(boostBar);
+						f.appendChild(boostContainer);
+
 						setTimeout(function(){
 							countDown.innerHTML = "2";
 						}, 1000);
@@ -1175,19 +1206,14 @@ function startGame(){
 window.onkeydown = function(e){
 	if(e.keyCode == 37) left = true;
 	if(e.keyCode == 39) right = true;
-	if(e.keyCode == 16){
-		if(!boostActive && Date.now() > boostCooldownEnd){
-			boostActive = true;
-			boostEndTime = Date.now() + BOOST_DURATION;
-			boostCooldownEnd = Date.now() + BOOST_DURATION + BOOST_COOLDOWN;
-		}
-	}
+	if(e.keyCode == 16) boostHeld = true;
 	if(e.keyCode == 32){ braking = true; e.preventDefault(); }
 }
 
 window.onkeyup = function(e){
 	if(e.keyCode == 37) left = false;
 	if(e.keyCode == 39) right = false;
+	if(e.keyCode == 16) boostHeld = false;
 	if(e.keyCode == 32) braking = false;
 }
 
