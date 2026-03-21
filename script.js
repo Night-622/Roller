@@ -6,8 +6,8 @@ var mapscale = 5;
 var VR = false;
 var BOUNCE_CORRECT = 0.01;
 var WALL_SIZE = 1.2;
-var MOUNTAIN_DIST = 250;
-var OOB_DIST = 300;
+var MOUNTAIN_DIST = 450;
+var OOB_DIST = 500;
 var LAPS = 3;
 
 // Boost settings
