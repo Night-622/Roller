@@ -1,28 +1,38 @@
-var SPEED = 0.005;
+var SPEED = 0.004;
 var CAMERA_LAG = 0.9;
 var COLLISION = 1.1;
-var BOUNCE = 0.5;
-var mapscale = 4;
+var BOUNCE = 0.7;
+var mapscale = 5;
 var VR = false;
 var BOUNCE_CORRECT = 0.01;
 var WALL_SIZE = 1.2;
-var MOUNTAIN_DIST = 1350;
-var OOB_DIST = 1200;
-var LAPS = 5;
+var MOUNTAIN_DIST = 250;
+var OOB_DIST = 200;
+var LAPS = 3;
 
 // Boost settings
-var BOOST_STRENGTH = 0.007;      // Extra speed while boosting
-var BOOST_RECHARGE_TIME = 8000;  // Time in ms to recharge from 0 to 100%
+var BOOST_STRENGTH = 0.012;      // Extra speed while boosting
+var BOOST_RECHARGE_TIME = 5000;  // Time in ms to recharge from 0 to 100%
 var BOOST_DRAIN_TIME = 3000;     // Time in ms to drain from 100% to 0% while holding shift
 
 // Brake settings
-var BRAKE_POWER = 0.44;
-var BRAKE_REVERSE = 0.0004;
+var BRAKE_POWER = 0.88;
+var BRAKE_REVERSE = 0.0008;
 function MODS(){
 
 }
 
 var serverList = [
+	{
+		apiKey: "AIzaSyCJHdK7KfqvyQ-gwvVbSNE69PHSDnWvXpo",
+		authDomain: "github-racing.firebaseapp.com",
+		databaseURL: "https://github-racing-default-rtdb.asia-southeast1.firebasedatabase.app",
+		projectId: "github-racing",
+		storageBucket: "github-racing.firebasestorage.app",
+		messagingSenderId: "979171326010",
+		appId: "1:979171326010:web:25b60c1cbd2d1017f49d03",
+		measurementId: "G-JF1TMMQ2NQ"
+	},
 	{
 		apiKey: "AIzaSyDiJsMLlix5o9XqPW1EpeBvuA15XNjlR8M",
 		authDomain: "car-game-a86b9.firebaseapp.com",
@@ -654,7 +664,7 @@ function loadMap(){
 	stripes.wrapT = THREE.RepeatWrapping;
 	stripes.repeat.set(100, 100);
 	var ground = new THREE.Mesh(
-		new THREE.PlaneBufferGeometry(6000, 6000),
+		new THREE.PlaneBufferGeometry(1000, 1000),
 		new THREE.MeshLambertMaterial({color: new THREE.Color(0x57c115), emissive: new THREE.Color(0x0f0f0f), emissiveMap: stripes})
 	);
 	ground.rotation.set(-Math.PI / 2, 0, 0);
@@ -686,7 +696,7 @@ function join(){
 		90,
 		window.innerWidth / window.innerHeight,
 		1,
-		6000
+		1000
 	);
 
 	camera.position.set(0, 3, 10);
@@ -1198,8 +1208,6 @@ window.onkeydown = function(e){
 	if(e.keyCode == 39) right = true;
 	if(e.keyCode == 16) boostHeld = true;
 	if(e.keyCode == 32){ braking = true; e.preventDefault(); }
-	if(e.keyCode == 73 && (e.ctrlKey || e.metaKey))
-		document.getElementById("trackcode").innerText = prompt("Track data?")
 }
 
 window.onkeyup = function(e){
@@ -1211,4 +1219,9 @@ window.onkeyup = function(e){
 
 if(mobile){
 
+}
+
+document.body.onkeydown = function(e){
+	if(e.keyCode == 73 && (e.ctrlKey || e.metaKey))
+		document.getElementById("trackcode").innerText = prompt("Track data?")
 }
