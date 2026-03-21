@@ -108,7 +108,7 @@ for(var i = 0; i < serverList.length; i++){
 	}
     	let tm = setTimeout(function(){
     	    la.delete();
-    	}, 5000);
+    	}, 15000);
 	la.auth().signInAnonymously().then(() => {
 		database = la.database();
 		database.ref("/testServer").once("value", function(e){
