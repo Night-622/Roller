@@ -16,8 +16,8 @@ var BOOST_RECHARGE_TIME = 5000;  // Time in ms to recharge from 0 to 100%
 var BOOST_DRAIN_TIME = 3000;     // Time in ms to drain from 100% to 0% while holding shift
 
 // Brake settings
-var BRAKE_POWER = 0.88;
-var BRAKE_REVERSE = 0.0008;
+var BRAKE_POWER = 0.97;
+var BRAKE_REVERSE = 0.0009;
 function MODS(){
 
 }
