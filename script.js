@@ -10,12 +10,10 @@ var MOUNTAIN_DIST = 450;
 var OOB_DIST = 500;
 var LAPS = 3;
 
-// Boost settings
-var BOOST_STRENGTH = 0.012;      // Extra speed while boosting
-var BOOST_RECHARGE_TIME = 5000;  // Time in ms to recharge from 0 to 100%
-var BOOST_DRAIN_TIME = 3000;     // Time in ms to drain from 100% to 0% while holding shift
+var BOOST_STRENGTH = 0.012;
+var BOOST_RECHARGE_TIME = 7000;
+var BOOST_DRAIN_TIME = 3000;
 
-// Brake settings
 var BRAKE_POWER = 0.97;
 var BRAKE_REVERSE = 0.0009;
 function MODS(){
