@@ -413,14 +413,14 @@ input{
 	position: absolute;
 	top: 3vmin;
 	right: 3vmin;
-	background: rgba(0, 0, 0, 0.65);
+	background: rgba(0, 0, 0, 0.7);
 	border: 0.4vmin solid rgba(255,255,255,0.4);
 	border-radius: 1.5vmin;
-	padding: 1.2vmin 1.8vmin;
+	padding: 1.2vmin 2vmin;
 	z-index: 100001;
-	min-width: 28vmin;
-	max-width: 40vmin;
-	backdrop-filter: blur(4px);
+	min-width: 58vmin;
+	max-width: 70vmin;
+	backdrop-filter: blur(6px);
 	display: none;
 }
 #leaderboard-title {
@@ -428,15 +428,46 @@ input{
 	color: #f4d03f;
 	font-size: 1.8vmin;
 	text-align: center;
-	margin-bottom: 1vmin;
+	margin-bottom: 0.6vmin;
 	text-shadow: 0 0 1vmin #f4d03f55;
 	letter-spacing: 0.1vmin;
 }
+#lb-lap-timer-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 0.8vmin;
+	padding-bottom: 0.6vmin;
+	border-bottom: 0.3vmin solid rgba(255,255,255,0.25);
+	gap: 1vmin;
+}
+#lb-lap-timer {
+	font-family: "Press Start 2P";
+	font-size: 2.2vmin;
+	color: #00e5ff;
+	text-shadow: 0 0 1vmin #00e5ff88;
+	letter-spacing: 0.05vmin;
+	flex: 1;
+	text-align: left;
+}
+#lb-position-badge {
+	font-family: "Press Start 2P";
+	font-size: 1.3vmin;
+	color: white;
+	background: rgba(255,255,255,0.1);
+	border: 0.25vmin solid rgba(255,255,255,0.3);
+	border-radius: 0.8vmin;
+	padding: 0.4vmin 0.8vmin;
+	white-space: nowrap;
+}
+#lb-position-badge.pos-1st { color: #f4d03f; border-color: #f4d03f88; background: rgba(244,208,63,0.12); }
+#lb-position-badge.pos-2nd { color: #bdc3c7; border-color: #bdc3c788; background: rgba(189,195,199,0.12); }
+#lb-position-badge.pos-3rd { color: #e67e22; border-color: #e67e2288; background: rgba(230,126,34,0.12); }
 .lb-row {
 	display: flex;
 	align-items: center;
-	gap: 1vmin;
-	padding: 0.4vmin 0;
+	gap: 1.2vmin;
+	padding: 0.45vmin 0;
 	border-bottom: 0.2vmin solid rgba(255,255,255,0.1);
 	font-family: "Press Start 2P";
 	font-size: 1.4vmin;
@@ -455,8 +486,8 @@ input{
 	flex-shrink: 0;
 }
 .lb-color {
-	width: 1.2vmin;
-	height: 1.2vmin;
+	width: 1.4vmin;
+	height: 1.4vmin;
 	border-radius: 50%;
 	flex-shrink: 0;
 }
@@ -466,11 +497,19 @@ input{
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
-.lb-info {
+.lb-lap-col {
 	font-size: 1.1vmin;
-	opacity: 0.8;
+	opacity: 0.75;
+	flex-shrink: 0;
+	min-width: 8vmin;
+	text-align: center;
+}
+.lb-info {
+	font-size: 1.2vmin;
+	opacity: 0.85;
 	flex-shrink: 0;
 	text-align: right;
+	min-width: 16vmin;
 }
 .lb-finished {
 	color: #2ecc71;
