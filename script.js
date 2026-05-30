@@ -554,19 +554,11 @@ host = function(){
 						// ===== LEADERBOARD =====
 						var lb = document.createElement("DIV");
 						lb.id = "leaderboard";
-						lb.innerHTML = "<div id='leaderboard-title'>RACE</div>" +
-							"<div id='lb-lap-timer-row'>" +
-								"<span id='lb-lap-timer'>00:00.000</span>" +
-								"<span id='lb-position-badge'>P1</span>" +
-							"</div>" +
-							"<div id='lb-rows'></div>";
+						lb.innerHTML = "<div id='leaderboard-title'>RACE</div><div id='lb-rows'></div>";
 						lb.style.display = "block";
 						f.appendChild(lb);
-
 						window._raceStartTime = null;
 						window._myFinishTime = null;
-						window._lapStartTime = null;
-						window._lastTrackedLap = 0;
 
 						setTimeout(function(){ countDown.innerHTML = "2"; }, 1000);
 						setTimeout(function(){ countDown.innerHTML = "1"; }, 2000);
@@ -574,9 +566,16 @@ host = function(){
 							countDown.innerHTML = "GO!";
 							gameSortaStarted = false;
 							window._raceStartTime = performance.now();
-							window._lapStartTime = performance.now();
 						}, 3000);
 						setTimeout(function(){ countDown.innerHTML = ""; }, 4000);
+					}
+				});
+			}else
+				getCode();
+		});
+	}
+
+	join();
 }
 
 joinGame = function(){
@@ -978,13 +977,6 @@ function join(){
 					// Track race time for my player
 					if(play == players[me.ref.path.pieces_[2]] && window._raceStartTime && !window._myFinishTime){
 						play.data.raceTime = performance.now() - window._raceStartTime;
-
-						// Lap timer - reset when lap increases
-						if(typeof window._lastTrackedLap === "undefined") window._lastTrackedLap = 0;
-						if(play.data.lap > window._lastTrackedLap){
-							window._lastTrackedLap = play.data.lap;
-							window._lapStartTime = performance.now();
-						}
 					}
 
 					for(var pl in players){
@@ -1045,31 +1037,6 @@ function join(){
 			var lbRows = document.getElementById("lb-rows");
 			if(lbRows){
 				var myKey = me.ref.path.pieces_[2];
-				var myData = me.data;
-
-				// ---- Lap timer: reset on each new lap ----
-				var myLap = Math.min(myData.lap || 1, LAPS);
-				if(window._lapStartTime && window._lastTrackedLap !== myLap){
-					window._lapStartTime = performance.now();
-					window._lastTrackedLap = myLap;
-				}
-				var lapElapsed = (window._lapStartTime && !window._myFinishTime)
-					? performance.now() - window._lapStartTime
-					: (window._myFinishTime ? 0 : 0);
-				var ltEl = document.getElementById("lb-lap-timer");
-				if(ltEl && !window._myFinishTime){
-					var lm = Math.floor(lapElapsed / 60000);
-					var ls = Math.floor((lapElapsed % 60000) / 1000);
-					var lms = Math.floor(lapElapsed % 1000);
-					ltEl.textContent =
-						String(lm).padStart(2,"0") + ":" +
-						String(ls).padStart(2,"0") + "." +
-						String(lms).padStart(3,"0");
-				} else if(ltEl && window._myFinishTime){
-					ltEl.textContent = "DONE";
-				}
-
-				// ---- Build sorted data ----
 				var lbData = [];
 				for(var pk in players){
 					var pd = players[pk].data;
@@ -1092,54 +1059,29 @@ function join(){
 						raceTime: elapsed
 					});
 				}
+				// Sort: finished first (by time), then by lap desc
 				lbData.sort(function(a, b){
 					if(a.finished && b.finished) return a.raceTime - b.raceTime;
 					if(a.finished) return -1;
 					if(b.finished) return 1;
 					return b.lap - a.lap;
 				});
-
-				// ---- Position badge ----
-				var myPos = 1;
-				for(var pi = 0; pi < lbData.length; pi++){
-					if(lbData[pi].key === myKey){ myPos = pi + 1; break; }
-				}
-				var badge = document.getElementById("lb-position-badge");
-				if(badge){
-					var suffixes = ["","st","nd","rd"];
-					var suf = myPos <= 3 ? suffixes[myPos] : "th";
-					badge.textContent = myPos + suf;
-					badge.className = ""; // reset
-					if(myPos === 1) badge.className = "pos-1st";
-					else if(myPos === 2) badge.className = "pos-2nd";
-					else if(myPos === 3) badge.className = "pos-3rd";
-				}
-
-				// ---- Rows ----
-				function fmtTime(ms){
-					var m = Math.floor(ms / 60000);
-					var s = Math.floor((ms % 60000) / 1000);
-					var msec = Math.floor(ms % 1000);
-					return String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0") + "." + String(msec).padStart(3,"0");
-				}
 				var html = "";
 				for(var i = 0; i < lbData.length; i++){
 					var d = lbData[i];
 					var isMe = d.key === myKey;
-					var lapCol = "L" + Math.min(d.lap, LAPS) + "/" + LAPS;
 					var timeStr = "";
 					if(d.finished){
-						timeStr = "<span class='lb-finished'>" + fmtTime(d.raceTime) + "</span>";
-						lapCol = "✓";
+						var s = d.raceTime / 1000;
+						timeStr = "<span class='lb-finished'>" + s.toFixed(2) + "s</span>";
 					} else {
-						timeStr = fmtTime(d.raceTime);
+						timeStr = "L" + Math.min(d.lap, LAPS) + "/" + LAPS;
 					}
 					var colorHex = "hsl(" + d.color + ",100%,50%)";
 					html += "<div class='lb-row" + (isMe ? " lb-me" : "") + "'>" +
 						"<span class='lb-pos'>" + (i+1) + "</span>" +
 						"<span class='lb-color' style='background:" + colorHex + "'></span>" +
-						"<span class='lb-name'>" + d.name.replaceAll("<","&lt;").substring(0,10) + "</span>" +
-						"<span class='lb-lap-col'>" + lapCol + "</span>" +
+						"<span class='lb-name'>" + d.name.replaceAll("<","&lt;").substring(0,12) + "</span>" +
 						"<span class='lb-info'>" + timeStr + "</span>" +
 						"</div>";
 				}
@@ -1353,20 +1295,11 @@ codeCheck = function(){
 						// ===== LEADERBOARD =====
 						var lb = document.createElement("DIV");
 						lb.id = "leaderboard";
-						lb.innerHTML = "<div id='leaderboard-title'>RACE</div>" +
-							"<div id='lb-lap-timer-row'>" +
-								"<span id='lb-lap-timer'>00:00.000</span>" +
-								"<span id='lb-position-badge'>P1</span>" +
-							"</div>" +
-							"<div id='lb-rows'></div>";
+						lb.innerHTML = "<div id='leaderboard-title'>RACE</div><div id='lb-rows'></div>";
 						lb.style.display = "block";
 						f.appendChild(lb);
-
-						// ===== LAP TIMER =====
 						window._raceStartTime = null;
 						window._myFinishTime = null;
-						window._lapStartTime = null;
-						window._lastTrackedLap = 0;
 
 						setTimeout(function(){ countDown.innerHTML = "2"; }, 1000);
 						setTimeout(function(){ countDown.innerHTML = "1"; }, 2000);
@@ -1374,7 +1307,6 @@ codeCheck = function(){
 							countDown.innerHTML = "GO!";
 							gameSortaStarted = false;
 							window._raceStartTime = performance.now();
-							window._lapStartTime = performance.now();
 						}, 3000);
 						setTimeout(function(){ countDown.innerHTML = ""; }, 4000);
 					}
