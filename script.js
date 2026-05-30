@@ -16,9 +16,6 @@ var BOOST_DRAIN_TIME = 4000;
 
 var BRAKE_POWER = 0.97;
 var BRAKE_REVERSE = 0.0009;
-
-var CLUTCH_DECEL = 0.985;
-
 function MODS(){
 
 }
@@ -323,7 +320,7 @@ function toggleFullScreen() {
 	window.scrollTo(0,1);
 }
 
-var name, code, players = {}, me = {}, gameStarted = false, gameSortaStarted = false, left = false, right = false, braking = false, boostHeld = false, clutchHeld = false, boostTank = 100, lap;
+var name, code, players = {}, me = {}, gameStarted = false, gameSortaStarted = false, left = false, right = false, braking = false, boostHeld = false, boostTank = 100, lap;
 var carPos = [
 	{x: 0, y: 0},
 	{x: 2, y: 0},
@@ -854,28 +851,12 @@ function join(){
 					}
 
 					var isBoosting = (play == players[me.ref.path.pieces_[2]] && boostHeld && boostTank > 0);
+					var currentSpeed = isBoosting ? SPEED + BOOST_STRENGTH : SPEED;
 
-if(play == players[me.ref.path.pieces_[2]] && clutchHeld){
+					play.data.xv += Math.sin(play.data.dir) * currentSpeed * warp;
+					play.data.yv += Math.cos(play.data.dir) * currentSpeed * warp;
 
-	// Clutch cuts engine power and slowly decelerates
-	if(play == players[me.ref.path.pieces_[2]] && clutchHeld){
-
-    // Clutch cuts engine power and slowly decelerates
-    play.data.xv *= Math.pow(CLUTCH_DECEL, warp);
-    play.data.yv *= Math.pow(CLUTCH_DECEL, warp);
-
-}else{
-
-    var currentSpeed = isBoosting
-        ? SPEED + BOOST_STRENGTH
-        : SPEED;
-
-    play.data.xv += Math.sin(play.data.dir) * currentSpeed * warp;
-    play.data.yv += Math.cos(play.data.dir) * currentSpeed * warp;
-
-}
-
-						if(play == players[me.ref.path.pieces_[2]] && braking && !isBoosting){
+					if(play == players[me.ref.path.pieces_[2]] && braking && !isBoosting){
 						play.data.xv *= Math.pow(BRAKE_POWER, warp);
 						play.data.yv *= Math.pow(BRAKE_POWER, warp);
 						play.data.xv -= Math.sin(play.data.dir) * BRAKE_REVERSE * warp;
@@ -1510,67 +1491,18 @@ function startGame(){
 	});
 }
 
-
 window.onkeydown = function(e){
-
-	// Left
-	if(e.keyCode == 37 || e.keyCode == 65)
-		left = true;
-
-	// Right
-	if(e.keyCode == 39 || e.keyCode == 68)
-		right = true;
-
-	// Boost (Q or Shift)
-	if(e.keyCode == 81 || e.keyCode == 16)
-		boostHeld = true;
-
-	// Brake (E or Space)
-	if(e.keyCode == 69 || e.keyCode == 32){
-		braking = true;
-		e.preventDefault();
-	}
-
-	// Clutch (Alt, 1, 2, 3, 4)
-	if(
-		e.keyCode == 18 ||
-		e.keyCode == 49 ||
-		e.keyCode == 50 ||
-		e.keyCode == 51 ||
-		e.keyCode == 52
-	){
-		clutchHeld = true;
-	}
+	if(e.keyCode == 37) left = true;
+	if(e.keyCode == 39) right = true;
+	if(e.keyCode == 16) boostHeld = true;
+	if(e.keyCode == 32){ braking = true; e.preventDefault(); }
 }
 
 window.onkeyup = function(e){
-
-	// Left
-	if(e.keyCode == 37 || e.keyCode == 65)
-		left = false;
-
-	// Right
-	if(e.keyCode == 39 || e.keyCode == 68)
-		right = false;
-
-	// Boost
-	if(e.keyCode == 81 || e.keyCode == 16)
-		boostHeld = false;
-
-	// Brake
-	if(e.keyCode == 69 || e.keyCode == 32)
-		braking = false;
-
-	// Clutch
-	if(
-		e.keyCode == 18 ||
-		e.keyCode == 49 ||
-		e.keyCode == 50 ||
-		e.keyCode == 51 ||
-		e.keyCode == 52
-	){
-		clutchHeld = false;
-	}
+	if(e.keyCode == 37) left = false;
+	if(e.keyCode == 39) right = false;
+	if(e.keyCode == 16) boostHeld = false;
+	if(e.keyCode == 32) braking = false;
 }
 
 if(mobile){
