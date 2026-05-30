@@ -625,7 +625,7 @@ host = function(){
 								"<span id='lb-position-badge'>P1</span>" +
 							"</div>" +
 							"<div id='lb-rows'></div>";
-						lb.style.display = "none";
+						lb.style.display = "block";
 						f.appendChild(lb);
 
 						// ===== LAP TIME PANEL (top right) =====
@@ -1379,9 +1379,7 @@ function join(){
 						"</div>";
 				}
 				lbRows.innerHTML = html;
-				// Also write rankings into the top-centre panel
-				var ltRank = document.getElementById("lt-rankings");
-				if(ltRank) ltRank.innerHTML = html;
+				
 			}
 		}else{
 			camera.position.set(50 * Math.sin(x), 20, 50 * Math.cos(x));
@@ -1598,7 +1596,7 @@ codeCheck = function(){
 								"<span id='lb-position-badge'>P1</span>" +
 							"</div>" +
 							"<div id='lb-rows'></div>";
-						lb.style.display = "none";
+						lb.style.display = "block";
 						f.appendChild(lb);
 
 						// ===== LAP TIME PANEL (top right) =====
@@ -1671,11 +1669,10 @@ window.onkeydown = function(e){
 	if(e.keyCode == 39 || e.keyCode == 68) right = true;  // Right arrow or D
 	if(e.keyCode == 16) boostHeld = true;
 	if(e.keyCode == 32){ braking = true; e.preventDefault(); }
-	// Clutch: Z, Alt, AltGr, M, 1, 2, 3, 4
-	if(e.keyCode == 90 || e.keyCode == 18 || e.keyCode == 225 || e.keyCode == 77 ||
-	   e.keyCode == 49 || e.keyCode == 50 || e.keyCode == 51 || e.keyCode == 52){
+	// Clutch: 1, 2, 3, 4, Z, M — stops acceleration, car keeps rolling
+	if(e.keyCode == 49 || e.keyCode == 50 || e.keyCode == 51 || e.keyCode == 52 ||
+	   e.keyCode == 90 || e.keyCode == 77){
 		clutch = true;
-		e.preventDefault();
 	}
 }
 
@@ -1685,8 +1682,8 @@ window.onkeyup = function(e){
 	if(e.keyCode == 16) boostHeld = false;
 	if(e.keyCode == 32) braking = false;
 	// Release clutch
-	if(e.keyCode == 90 || e.keyCode == 18 || e.keyCode == 225 || e.keyCode == 77 ||
-	   e.keyCode == 49 || e.keyCode == 50 || e.keyCode == 51 || e.keyCode == 52){
+	if(e.keyCode == 49 || e.keyCode == 50 || e.keyCode == 51 || e.keyCode == 52 ||
+	   e.keyCode == 90 || e.keyCode == 77){
 		clutch = false;
 	}
 }
