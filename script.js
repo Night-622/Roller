@@ -754,39 +754,56 @@ function loadMap(){
 
 	// ===== CHECKPOINTS (segment 4) =====
 	checkpointsc = new THREE.Object3D();
-	var cpRawData = document.getElementById("trackcode").innerHTML.trim().split("|");
-	var cpdata = cpRawData.length > 4 ? cpRawData[4].trim().split(" ") : [];
-	for(var i = 0; i < cpdata.length; i++){
-		if(cpdata[i] == "")
-			continue;
-		var point1 = new THREE.Vector2(parseInt(cpdata[i].split("/")[0].split(",")[0]), parseInt(cpdata[i].split("/")[0].split(",")[1]));
-		var point2 = new THREE.Vector2(parseInt(cpdata[i].split("/")[1].split(",")[0]), parseInt(cpdata[i].split("/")[1].split(",")[1]));
-		if(isNaN(point1.x) || isNaN(point1.y) || isNaN(point2.x) || isNaN(point2.y))
-			continue;
-		var cpWall = new THREE.Mesh(
-			new THREE.BoxBufferGeometry(point1.distanceTo(point2) * mapscale, 0.15, 1),
-			new THREE.MeshLambertMaterial({color: new THREE.Color("#f5c518"), transparent: true, opacity: 0.85})
-		);
-		var angle = Math.atan2((point1.y - point2.y), (point1.x - point2.x));
-		cpWall.position.set(-(point1.x + point2.x) / 2 * mapscale, 0, (point1.y + point2.y) / 2 * mapscale);
-		cpWall.rotation.set(0, angle, 0, "YXZ");
-		var plane = new THREE.Plane(new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), angle));
-		cpWall.plane = plane;
-		cpWall.width = point1.distanceTo(point2) * mapscale;
-		cpWall.p1 = point1.clone().multiply(new THREE.Vector2(-mapscale, mapscale));
-		cpWall.p2 = point2.clone().multiply(new THREE.Vector2(-mapscale, mapscale));
-		cpWall.cpIndex = i;
-		checkpointsc.add(cpWall);
+	try {
+		var cpRawData = document.getElementById("trackcode").innerHTML.trim().split("|");
+		var cpdata = cpRawData.length > 4 ? cpRawData[4].trim().split(" ") : [];
+		for(var i = 0; i < cpdata.length; i++){
+			if(!cpdata[i] || cpdata[i].trim() == "" || cpdata[i].indexOf("/") < 0)
+				continue;
+			var cpParts = cpdata[i].split("/");
+			if(cpParts.length < 2) continue;
+			var p1parts = cpParts[0].split(",");
+			var p2parts = cpParts[1].split(",");
+			if(p1parts.length < 2 || p2parts.length < 2) continue;
+			var x1 = parseInt(p1parts[0]), y1 = parseInt(p1parts[1]);
+			var x2 = parseInt(p2parts[0]), y2 = parseInt(p2parts[1]);
+			if(isNaN(x1) || isNaN(y1) || isNaN(x2) || isNaN(y2)) continue;
+			var point1 = new THREE.Vector2(x1, y1);
+			var point2 = new THREE.Vector2(x2, y2);
+			var cpWall = new THREE.Mesh(
+				new THREE.BoxBufferGeometry(point1.distanceTo(point2) * mapscale, 0.15, 1),
+				new THREE.MeshLambertMaterial({color: new THREE.Color("#f5c518"), transparent: true, opacity: 0.85})
+			);
+			var angle = Math.atan2((point1.y - point2.y), (point1.x - point2.x));
+			cpWall.position.set(-(point1.x + point2.x) / 2 * mapscale, 0, (point1.y + point2.y) / 2 * mapscale);
+			cpWall.rotation.set(0, angle, 0, "YXZ");
+			var plane = new THREE.Plane(new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), angle));
+			cpWall.plane = plane;
+			cpWall.width = point1.distanceTo(point2) * mapscale;
+			cpWall.p1 = new THREE.Vector2(-x1 * mapscale, y1 * mapscale);
+			cpWall.p2 = new THREE.Vector2(-x2 * mapscale, y2 * mapscale);
+			cpWall.cpIndex = i;
+			checkpointsc.add(cpWall);
+		}
+	} catch(e) {
+		console.warn("Checkpoint parse error:", e);
 	}
 	scene.add(checkpointsc);
 
-	// Eval code is segment 5 (new format) or segment 4 (old format without checkpoints)
+	// Eval code: segment 5 for new format (with checkpoints), segment 4 for old format
 	var segments = document.getElementById("trackcode").innerText.trim().split("|");
-	return segments.length > 5 ? segments[5] : segments[4];
+	var evalCode = segments.length >= 6 ? segments[5] : segments[4];
+	return evalCode || "";
 }
 
 function join(){
-	eval(loadMap());
+	try {
+		eval(loadMap());
+	} catch(e) {
+		console.error("loadMap error:", e);
+		alert("Map load error: " + e.message);
+		return;
+	}
 
 	scene.background = new THREE.Color(0x7fb0ff);
 
