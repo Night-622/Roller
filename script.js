@@ -17,7 +17,7 @@ var BOOST_DRAIN_TIME = 4000;
 var BRAKE_POWER = 0.97;
 var BRAKE_REVERSE = 0.0009;
 
-var CLUTCH_FRICTION = 2.2; // Decel rate while clutch held (lower = stops faster, higher = coasts longer; between BRAKE_POWER and 0.99)
+var CLUTCH_FRICTION = 2.975; // Decel rate while clutch held (lower = stops faster, higher = coasts longer; between BRAKE_POWER and 0.99)
 
 // Count number of set bits in a bitmask (used for checkpoint progress)
 function countBits(n){ var c = 0; while(n){ c += n & 1; n >>= 1; } return c; }
@@ -752,15 +752,17 @@ function loadMap(){
 	}
 	scene.add(main);
 
-	// ===== CHECKPOINTS (segment 5) =====
+	// ===== CHECKPOINTS (segment 4) =====
 	checkpointsc = new THREE.Object3D();
 	var cpRawData = document.getElementById("trackcode").innerHTML.trim().split("|");
-	var cpdata = cpRawData.length > 5 ? cpRawData[5].trim().split(" ") : [];
+	var cpdata = cpRawData.length > 4 ? cpRawData[4].trim().split(" ") : [];
 	for(var i = 0; i < cpdata.length; i++){
 		if(cpdata[i] == "")
 			continue;
 		var point1 = new THREE.Vector2(parseInt(cpdata[i].split("/")[0].split(",")[0]), parseInt(cpdata[i].split("/")[0].split(",")[1]));
 		var point2 = new THREE.Vector2(parseInt(cpdata[i].split("/")[1].split(",")[0]), parseInt(cpdata[i].split("/")[1].split(",")[1]));
+		if(isNaN(point1.x) || isNaN(point1.y) || isNaN(point2.x) || isNaN(point2.y))
+			continue;
 		var cpWall = new THREE.Mesh(
 			new THREE.BoxBufferGeometry(point1.distanceTo(point2) * mapscale, 0.15, 1),
 			new THREE.MeshLambertMaterial({color: new THREE.Color("#f5c518"), transparent: true, opacity: 0.85})
@@ -771,14 +773,16 @@ function loadMap(){
 		var plane = new THREE.Plane(new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), angle));
 		cpWall.plane = plane;
 		cpWall.width = point1.distanceTo(point2) * mapscale;
-		cpWall.p1 = point1.multiply(new THREE.Vector2(-mapscale, mapscale));
-		cpWall.p2 = point2.multiply(new THREE.Vector2(-mapscale, mapscale));
-		cpWall.cpIndex = i; // which checkpoint this is (0-based)
+		cpWall.p1 = point1.clone().multiply(new THREE.Vector2(-mapscale, mapscale));
+		cpWall.p2 = point2.clone().multiply(new THREE.Vector2(-mapscale, mapscale));
+		cpWall.cpIndex = i;
 		checkpointsc.add(cpWall);
 	}
 	scene.add(checkpointsc);
-	
-	return document.getElementById("trackcode").innerText.trim().split("|")[4];
+
+	// Eval code is segment 5 (new format) or segment 4 (old format without checkpoints)
+	var segments = document.getElementById("trackcode").innerText.trim().split("|");
+	return segments.length > 5 ? segments[5] : segments[4];
 }
 
 function join(){
