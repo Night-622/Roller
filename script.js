@@ -17,7 +17,7 @@ var BOOST_DRAIN_TIME = 4000;
 var BRAKE_POWER = 0.97;
 var BRAKE_REVERSE = 0.0009;
 
-var CLUTCH_FRICTION = 2.975; // Decel rate while clutch held (lower = stops faster, higher = coasts longer; between BRAKE_POWER and 0.99)
+var CLUTCH_FRICTION = 1.475; // Decel rate while clutch held (lower = stops faster, higher = coasts longer; between BRAKE_POWER and 0.99)
 
 // Count number of set bits in a bitmask (used for checkpoint progress)
 function countBits(n){ var c = 0; while(n){ c += n & 1; n >>= 1; } return c; }
