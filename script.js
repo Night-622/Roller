@@ -1022,13 +1022,17 @@ function join(){
 					if(checkpointsc){
 						for(var ci = 0; ci < checkpointsc.children.length; ci++){
 							var cpLine = checkpointsc.children[ci];
-							if(Math.abs(cpLine.plane.distanceToPoint(play.model.position.clone().sub(cpLine.position))) < 1){
-								if(cpLine.position.clone().distanceTo(play.model.position) < cpLine.width / 2 + 1){
-									play.data.checkpointsMask = (play.data.checkpointsMask || 0) | (1 << ci);
-									// Flash the checkpoint yellow->white when hit (local player only)
-									if(play == players[me.ref.path.pieces_[2]]){
-										cpLine.material.color.set("#ffffff");
-										(function(mat){ setTimeout(function(){ mat.color.set("#f5c518"); }, 300); })(cpLine.material);
+							// Skip if this checkpoint bit already set (avoids repeated flash spam)
+							var alreadyHit = (play.data.checkpointsMask || 0) & (1 << ci);
+							if(!alreadyHit){
+								if(Math.abs(cpLine.plane.distanceToPoint(play.model.position.clone().sub(cpLine.position))) < 1){
+									if(cpLine.position.clone().distanceTo(play.model.position) < cpLine.width / 2 + 1){
+										play.data.checkpointsMask = (play.data.checkpointsMask || 0) | (1 << ci);
+										// Flash the checkpoint yellow->white when hit (local player only)
+										if(play == players[me.ref.path.pieces_[2]]){
+											cpLine.material.color.set("#ffffff");
+											(function(mat){ setTimeout(function(){ mat.color.set("#f5c518"); }, 300); })(cpLine.material);
+										}
 									}
 								}
 							}
@@ -1202,7 +1206,7 @@ function join(){
 
 			me.ref.set(me.data);
 
-			lap.innerHTML = me.data.lap <= LAPS ? me.data.lap + "/" + LAPS : "";
+			lap.innerHTML = me.data.lap <= LAPS ? (me.data.lap + 1) + "/" + LAPS : "";
 
 			// ===== UPDATE LEADERBOARD =====
 			var lbRows = document.getElementById("lb-rows");
@@ -1296,7 +1300,7 @@ function join(){
 				for(var i = 0; i < lbData.length; i++){
 					var d = lbData[i];
 					var isMe = d.key === myKey;
-					var lapCol = "L" + Math.min(d.lap, LAPS) + "/" + LAPS;
+					var lapCol = "L" + Math.min(d.lap + 1, LAPS) + "/" + LAPS;
 					if(totalCPsLB > 0 && !d.finished)
 						lapCol += " CP" + d.cpHit + "/" + totalCPsLB;
 					var timeStr = "";
