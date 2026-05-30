@@ -16,6 +16,11 @@ var BOOST_DRAIN_TIME = 4000;
 
 var BRAKE_POWER = 0.97;
 var BRAKE_REVERSE = 0.0009;
+
+var CLUTCH_FRICTION = 0.975; // Decel rate while clutch held (lower = stops faster, higher = coasts longer; between BRAKE_POWER and 0.99)
+
+// Count number of set bits in a bitmask (used for checkpoint progress)
+function countBits(n){ var c = 0; while(n){ c += n & 1; n >>= 1; } return c; }
 function MODS(){
 
 }
@@ -321,6 +326,7 @@ function toggleFullScreen() {
 }
 
 var name, code, players = {}, me = {}, gameStarted = false, gameSortaStarted = false, left = false, right = false, braking = false, boostHeld = false, boostTank = 100, lap;
+var clutch = false; // Clutch pedal: disengages engine (no accel) and slowly decelerates
 var carPos = [
 	{x: 0, y: 0},
 	{x: 2, y: 0},
@@ -512,6 +518,7 @@ host = function(){
 					color: color,
 					name: name,
 					checkpoint: 1,
+					checkpointsMask: 0,
 					lap: 0,
 					collision: {},
 					pcId: PC_ID,
@@ -603,7 +610,7 @@ joinGame = function(){
 	join();
 }
 
-var map, trees, signs, startc, main;
+var map, trees, signs, startc, checkpointsc, main;
 
 function deleteMap(){
 	while(map.children.length > 0)
@@ -618,6 +625,11 @@ function deleteMap(){
 	while(startc.children.length > 0)
 		startc.remove(startc.children[0]);
 	scene.remove(startc);
+	if(checkpointsc){
+		while(checkpointsc.children.length > 0)
+			checkpointsc.remove(checkpointsc.children[0]);
+		scene.remove(checkpointsc);
+	}
 	while(main.children.length > 0)
 		main.remove(main.children[0]);
 	scene.remove(main);
@@ -740,6 +752,32 @@ function loadMap(){
 	}
 	scene.add(main);
 
+	// ===== CHECKPOINTS (segment 5) =====
+	checkpointsc = new THREE.Object3D();
+	var cpRawData = document.getElementById("trackcode").innerHTML.trim().split("|");
+	var cpdata = cpRawData.length > 5 ? cpRawData[5].trim().split(" ") : [];
+	for(var i = 0; i < cpdata.length; i++){
+		if(cpdata[i] == "")
+			continue;
+		var point1 = new THREE.Vector2(parseInt(cpdata[i].split("/")[0].split(",")[0]), parseInt(cpdata[i].split("/")[0].split(",")[1]));
+		var point2 = new THREE.Vector2(parseInt(cpdata[i].split("/")[1].split(",")[0]), parseInt(cpdata[i].split("/")[1].split(",")[1]));
+		var cpWall = new THREE.Mesh(
+			new THREE.BoxBufferGeometry(point1.distanceTo(point2) * mapscale, 0.15, 1),
+			new THREE.MeshLambertMaterial({color: new THREE.Color("#f5c518"), transparent: true, opacity: 0.85})
+		);
+		var angle = Math.atan2((point1.y - point2.y), (point1.x - point2.x));
+		cpWall.position.set(-(point1.x + point2.x) / 2 * mapscale, 0, (point1.y + point2.y) / 2 * mapscale);
+		cpWall.rotation.set(0, angle, 0, "YXZ");
+		var plane = new THREE.Plane(new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), angle));
+		cpWall.plane = plane;
+		cpWall.width = point1.distanceTo(point2) * mapscale;
+		cpWall.p1 = point1.multiply(new THREE.Vector2(-mapscale, mapscale));
+		cpWall.p2 = point2.multiply(new THREE.Vector2(-mapscale, mapscale));
+		cpWall.cpIndex = i; // which checkpoint this is (0-based)
+		checkpointsc.add(cpWall);
+	}
+	scene.add(checkpointsc);
+
 	return document.getElementById("trackcode").innerText.trim().split("|")[4];
 }
 
@@ -850,17 +888,26 @@ function join(){
 						if(bar) bar.style.width = boostTank + "%";
 					}
 
-					var isBoosting = (play == players[me.ref.path.pieces_[2]] && boostHeld && boostTank > 0);
+					var isMe = (play == players[me.ref.path.pieces_[2]]);
+					var isBoosting = (isMe && boostHeld && boostTank > 0);
+					var isClutching = (isMe && clutch);
 					var currentSpeed = isBoosting ? SPEED + BOOST_STRENGTH : SPEED;
 
-					play.data.xv += Math.sin(play.data.dir) * currentSpeed * warp;
-					play.data.yv += Math.cos(play.data.dir) * currentSpeed * warp;
+					// Clutch: disengage engine — no acceleration, slow coast-down
+					if(!isClutching){
+						play.data.xv += Math.sin(play.data.dir) * currentSpeed * warp;
+						play.data.yv += Math.cos(play.data.dir) * currentSpeed * warp;
+					}
 
-					if(play == players[me.ref.path.pieces_[2]] && braking && !isBoosting){
+					if(isMe && braking && !isBoosting){
 						play.data.xv *= Math.pow(BRAKE_POWER, warp);
 						play.data.yv *= Math.pow(BRAKE_POWER, warp);
 						play.data.xv -= Math.sin(play.data.dir) * BRAKE_REVERSE * warp;
 						play.data.yv -= Math.cos(play.data.dir) * BRAKE_REVERSE * warp;
+					} else if(isClutching){
+						// Clutch decel: slower than braking, faster than normal friction
+						play.data.xv *= Math.pow(CLUTCH_FRICTION, warp);
+						play.data.yv *= Math.pow(CLUTCH_FRICTION, warp);
 					} else {
 						play.data.xv *= Math.pow(0.99, warp);
 						play.data.yv *= Math.pow(0.99, warp);
@@ -946,18 +993,46 @@ function join(){
 						}
 					}
 
+					// ===== CHECKPOINT & LAP DETECTION =====
+					var totalCPs = checkpointsc ? checkpointsc.children.length : 0;
+					var allCPsMask = totalCPs > 0 ? (1 << totalCPs) - 1 : 0;
+
+					// Check named checkpoints (yellow lines) — set bits in mask
+					if(checkpointsc){
+						for(var ci = 0; ci < checkpointsc.children.length; ci++){
+							var cpLine = checkpointsc.children[ci];
+							if(Math.abs(cpLine.plane.distanceToPoint(play.model.position.clone().sub(cpLine.position))) < 1){
+								if(cpLine.position.clone().distanceTo(play.model.position) < cpLine.width / 2 + 1){
+									play.data.checkpointsMask = (play.data.checkpointsMask || 0) | (1 << ci);
+									// Flash the checkpoint yellow->white when hit (local player only)
+									if(play == players[me.ref.path.pieces_[2]]){
+										cpLine.material.color.set("#ffffff");
+										(function(mat){ setTimeout(function(){ mat.color.set("#f5c518"); }, 300); })(cpLine.material);
+									}
+								}
+							}
+						}
+					}
+
+					// Check start/finish line (index 0 = finish, index 1 = old single checkpoint)
 					for(var i in startc.children){
 						var cp = startc.children[i];
 						if(Math.abs(cp.plane.distanceToPoint(play.model.position.clone().sub(cp.position))) < 1){
 							if(cp.position.clone().distanceTo(play.model.position) < cp.width / 2 + 1){
-								// console.log(i);
 								if(i == 0){
-									if(play.data.checkpoint == 1){
-										play.data.checkpoint = 0;
-										play.data.lap++;
+									// Finish line: only count lap if all checkpoints were hit (or no checkpoints placed)
+									var cpMask = play.data.checkpointsMask || 0;
+									if(totalCPs === 0 || cpMask === allCPsMask){
+										if(play.data.checkpoint == 1){
+											play.data.checkpoint = 0;
+											play.data.checkpointsMask = 0; // reset for next lap
+											play.data.lap++;
+										}
 									}
-								}else
+								} else {
+									// Old-style single checkpoint (still supported for backwards compat)
 									play.data.checkpoint = 1;
+								}
 							}
 						}
 					}
@@ -1138,6 +1213,7 @@ function join(){
 
 				// ---- Build sorted data ----
 				var lbData = [];
+				var totalCPsLB = checkpointsc ? checkpointsc.children.length : 0;
 				for(var pk in players){
 					var pd = players[pk].data;
 					var elapsed = 0;
@@ -1150,11 +1226,16 @@ function join(){
 							elapsed = pd.raceTime || 0;
 						}
 					}
+					// Progress score: each lap = totalCPs+1 steps, plus how many CPs hit this lap
+					var cpHit = totalCPsLB > 0 ? countBits(pd.checkpointsMask || 0) : 0;
+					var progress = (pd.lap || 0) * (totalCPsLB + 1) + cpHit;
 					lbData.push({
 						key: pk,
 						name: pd.name || "?",
 						color: pd.color || 0,
 						lap: pd.lap || 0,
+						cpHit: cpHit,
+						progress: progress,
 						finished: pd.finished || (pd.lap > LAPS),
 						raceTime: elapsed
 					});
@@ -1163,7 +1244,8 @@ function join(){
 					if(a.finished && b.finished) return a.raceTime - b.raceTime;
 					if(a.finished) return -1;
 					if(b.finished) return 1;
-					return b.lap - a.lap;
+					// Sort by progress (lap * (totalCPs+1) + checkpoints hit this lap)
+					return b.progress - a.progress;
 				});
 
 				// ---- Position badge ----
@@ -1194,6 +1276,8 @@ function join(){
 					var d = lbData[i];
 					var isMe = d.key === myKey;
 					var lapCol = "L" + Math.min(d.lap, LAPS) + "/" + LAPS;
+					if(totalCPsLB > 0 && !d.finished)
+						lapCol += " CP" + d.cpHit + "/" + totalCPsLB;
 					var timeStr = "";
 					if(d.finished){
 						timeStr = "<span class='lb-finished'>" + fmtTime(d.raceTime) + "</span>";
@@ -1379,6 +1463,7 @@ codeCheck = function(){
 					color: color,
 					name: name,
 					checkpoint: 1,
+					checkpointsMask: 0,
 					lap: 0,
 					collision: {},
 					pcId: PC_ID,
@@ -1492,17 +1577,28 @@ function startGame(){
 }
 
 window.onkeydown = function(e){
-	if(e.keyCode == 37) left = true;
-	if(e.keyCode == 39) right = true;
+	if(e.keyCode == 37 || e.keyCode == 65) left = true;   // Left arrow or A
+	if(e.keyCode == 39 || e.keyCode == 68) right = true;  // Right arrow or D
 	if(e.keyCode == 16) boostHeld = true;
 	if(e.keyCode == 32){ braking = true; e.preventDefault(); }
+	// Clutch: Alt keys (18 = Alt, 225 = AltGr) or number keys 1-4
+	if(e.keyCode == 18 || e.keyCode == 225 ||
+	   e.keyCode == 49 || e.keyCode == 50 || e.keyCode == 51 || e.keyCode == 52){
+		clutch = true;
+		e.preventDefault();
+	}
 }
 
 window.onkeyup = function(e){
-	if(e.keyCode == 37) left = false;
-	if(e.keyCode == 39) right = false;
+	if(e.keyCode == 37 || e.keyCode == 65) left = false;   // Left arrow or A
+	if(e.keyCode == 39 || e.keyCode == 68) right = false;  // Right arrow or D
 	if(e.keyCode == 16) boostHeld = false;
 	if(e.keyCode == 32) braking = false;
+	// Release clutch when all clutch keys are up
+	if(e.keyCode == 18 || e.keyCode == 225 ||
+	   e.keyCode == 49 || e.keyCode == 50 || e.keyCode == 51 || e.keyCode == 52){
+		clutch = false;
+	}
 }
 
 if(mobile){
