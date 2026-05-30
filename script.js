@@ -17,10 +17,61 @@ var BOOST_DRAIN_TIME = 4000;
 var BRAKE_POWER = 0.97;
 var BRAKE_REVERSE = 0.0009;
 
-var CLUTCH_FRICTION = 1.475; // Decel rate while clutch held (lower = stops faster, higher = coasts longer; between BRAKE_POWER and 0.99)
+var CLUTCH_FRICTION = 0.9999; // Decel rate while clutch held (lower = stops faster, higher = coasts longer; between BRAKE_POWER and 0.99)
 
 // Count number of set bits in a bitmask (used for checkpoint progress)
 function countBits(n){ var c = 0; while(n){ c += n & 1; n >>= 1; } return c; }
+
+function fmtLapTime(ms){
+	var m = Math.floor(ms / 60000);
+	var s = Math.floor((ms % 60000) / 1000);
+	var msec = Math.floor(ms % 1000);
+	return String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0") + "." + String(msec).padStart(3,"0");
+}
+
+function setupLapTimePanel(){
+	// Remove any existing panel
+	var old = document.getElementById("laptime-panel");
+	if(old) old.parentNode.removeChild(old);
+
+	var ltPanel = document.createElement("DIV");
+	ltPanel.id = "laptime-panel";
+	ltPanel.style.cssText = [
+		"position:absolute",
+		"top:10px",
+		"right:10px",
+		"text-align:right",
+		"font-family:'Press Start 2P',monospace",
+		"color:#fff",
+		"text-shadow:1px 1px 4px #000,0 0 8px #000",
+		"pointer-events:none",
+		"z-index:9999",
+		"line-height:1.7"
+	].join(";");
+	ltPanel.innerHTML =
+		"<div id='lt-current'  style='font-size:2vmin'>LAP &nbsp;--:--.---</div>" +
+		"<div id='lt-best'     style='font-size:1.6vmin;color:#f5c518'>BEST --:--.---</div>" +
+		"<div id='lt-overall'  style='font-size:1.4vmin;color:#7df'>RECORD --:--.--- (?)</div>";
+	document.getElementById("fore").appendChild(ltPanel);
+
+	// Fetch overall best lap for this map from Firebase
+	window._overallBestLap = null;
+	window._overallBestName = null;
+	window._sessionBestLap = null;
+	window._myLapSplits = window._myLapSplits || [];
+	var mapKey = (document.title || "track").replace(/[^a-zA-Z0-9_]/g, "_");
+	if(typeof database !== "undefined"){
+		database.ref("bestlaps/" + mapKey).once("value", function(snap){
+			var d = snap.val();
+			if(d && d.lapTime){
+				window._overallBestLap = d.lapTime;
+				window._overallBestName = d.name || "?";
+				var el = document.getElementById("lt-overall");
+				if(el) el.textContent = "RECORD " + fmtLapTime(d.lapTime) + " (" + d.name + ")";
+			}
+		});
+	}
+}
 function MODS(){
 
 }
@@ -572,6 +623,9 @@ host = function(){
 							"<div id='lb-rows'></div>";
 						lb.style.display = "block";
 						f.appendChild(lb);
+
+						// ===== LAP TIME PANEL (top right) =====
+						setupLapTimePanel();
 
 						window._raceStartTime = null;
 						window._myFinishTime = null;
@@ -1214,19 +1268,35 @@ function join(){
 					window._lastTrackedLap = myLap;
 				}
 				var lapElapsed = (window._lapStartTime && !window._myFinishTime)
-					? performance.now() - window._lapStartTime
-					: (window._myFinishTime ? 0 : 0);
+					? performance.now() - window._lapStartTime : 0;
+
+				// Update leaderboard lap timer
 				var ltEl = document.getElementById("lb-lap-timer");
-				if(ltEl && !window._myFinishTime){
-					var lm = Math.floor(lapElapsed / 60000);
-					var ls = Math.floor((lapElapsed % 60000) / 1000);
-					var lms = Math.floor(lapElapsed % 1000);
-					ltEl.textContent =
-						String(lm).padStart(2,"0") + ":" +
-						String(ls).padStart(2,"0") + "." +
-						String(lms).padStart(3,"0");
-				} else if(ltEl && window._myFinishTime){
-					ltEl.textContent = "DONE";
+				if(ltEl) ltEl.textContent = window._myFinishTime ? "DONE" : fmtLapTime(lapElapsed);
+
+				// ---- Top-right lap time panel ----
+				var ltCur = document.getElementById("lt-current");
+				var ltBest = document.getElementById("lt-best");
+				var ltOverall = document.getElementById("lt-overall");
+				if(ltCur) ltCur.textContent = window._myFinishTime ? "DONE" : ("LAP  " + fmtLapTime(lapElapsed));
+				if(ltBest){
+					var splits = window._myLapSplits || [];
+					if(splits.length > 0){
+						var sessionBest = Math.min.apply(null, splits);
+						if(!window._sessionBestLap || sessionBest < window._sessionBestLap){
+							window._sessionBestLap = sessionBest;
+							if(!window._overallBestLap || sessionBest < window._overallBestLap){
+								window._overallBestLap = sessionBest;
+								window._overallBestName = me.data.name;
+								var mapKey = (document.title || "track").replace(/[^a-zA-Z0-9_]/g,"_");
+								database.ref("bestlaps/" + mapKey).set({ lapTime: sessionBest, name: me.data.name, pcId: PC_ID, timestamp: Date.now() });
+								if(ltOverall) ltOverall.textContent = "RECORD  " + fmtLapTime(sessionBest) + "  (" + me.data.name + ")";
+							}
+						}
+						ltBest.textContent = "BEST  " + fmtLapTime(sessionBest);
+					} else {
+						ltBest.textContent = "BEST  --:--.---";
+					}
 				}
 
 				// ---- Build sorted data ----
@@ -1531,6 +1601,9 @@ codeCheck = function(){
 							"<div id='lb-rows'></div>";
 						lb.style.display = "block";
 						f.appendChild(lb);
+
+						// ===== LAP TIME PANEL (top right) =====
+						setupLapTimePanel();
 
 						// ===== LAP TIMER =====
 						window._raceStartTime = null;
