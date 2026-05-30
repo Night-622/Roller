@@ -40,22 +40,7 @@ input{
 	transition: -webkit-transform .5s ease-out;
 	transition: transform .5s ease-out;
 	transition: transform .5s ease-out, -webkit-transform .5s ease-out;
-/* 	animation: slidetop 0.5s ease-out forwards; */
 }
-/* @keyframes slidetop{
-	0%{transform: translate3d(0, -100vh, 0)}
-}
-@keyframes leavetop{
-	100%{transform: translate3d(0, -100vh, 0)}
-}
-@keyframes slideleft{
-	0%{transform: translate3d(-100vw, 0, 0)}
-	50%{transform: translate3d(-100vw, 0, 0)}
-}
-@keyframes slideright{
-	0%{transform: translate3d(100vw, 0, 0)}
-	50%{transform: translate3d(100vw, 0, 0)}
-} */
 .menuitem{
 	color: white;
 	font-size: 7vmin;
@@ -66,7 +51,6 @@ input{
 	transition: -webkit-transform .5s ease-out;
 	transition: transform .5s ease-out;
 	transition: transform .5s ease-out, -webkit-transform .5s ease-out;
-/* 	animation: slideleft 1s -0.5s ease-out forwards; */
 }
 #name{
 	background-color: rgba(0, 0, 0, 0.5);
@@ -243,7 +227,6 @@ input{
 	display: none;
 }
 #start{
-/* 	animation: slideleft 1s -0.25s forwards; */
 	font-size: 10vmin;
 	background-color: rgba(0, 0, 0, 0.5);
 	display: inline-block;
@@ -289,8 +272,6 @@ input{
 	transition: box-shadow .2s, -webkit-transform .5s ease-out;
 	transition: transform .5s ease-out, box-shadow .2s;
 	transition: transform .5s ease-out, box-shadow .2s, -webkit-transform .5s ease-out;
-/* 	-webkit-transform-style: preserve-3d; */
-/* 	animation: slideleft 1s -0.5s ease-out forwards; */
 }
 #join{
 	top: calc(70vh - 8vmin);
@@ -299,8 +280,6 @@ input{
 	transition: box-shadow .2s, -webkit-transform .5s ease-out;
 	transition: transform .5s ease-out, box-shadow .2s;
 	transition: transform .5s ease-out, box-shadow .2s, -webkit-transform .5s ease-out;
-/* 	-webkit-transform-style: preserve-3d; */
-/* 	animation: slideleft 1s ease-out forwards; */
 }
 .info{
 	position: absolute;
@@ -402,7 +381,6 @@ input{
 }
 #mywebsitelink{
 	display: none;
-
 	position: absolute;
 	bottom: 0;
 	left: 0;
@@ -428,4 +406,173 @@ input{
 }
 #warning a {
 	color: white;
+}
+
+/* ===== LEADERBOARD ===== */
+#leaderboard {
+	position: absolute;
+	top: 3vmin;
+	right: 3vmin;
+	background: rgba(0, 0, 0, 0.7);
+	border: 0.4vmin solid rgba(255,255,255,0.4);
+	border-radius: 1.5vmin;
+	padding: 1.2vmin 2vmin;
+	z-index: 100001;
+	min-width: 58vmin;
+	max-width: 70vmin;
+	backdrop-filter: blur(6px);
+	display: none;
+}
+#leaderboard-title {
+	font-family: "Press Start 2P";
+	color: #f4d03f;
+	font-size: 1.8vmin;
+	text-align: center;
+	margin-bottom: 0.6vmin;
+	text-shadow: 0 0 1vmin #f4d03f55;
+	letter-spacing: 0.1vmin;
+}
+#lb-lap-timer-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 0.8vmin;
+	padding-bottom: 0.6vmin;
+	border-bottom: 0.3vmin solid rgba(255,255,255,0.25);
+	gap: 1vmin;
+}
+#lb-lap-timer {
+	font-family: "Press Start 2P";
+	font-size: 2.2vmin;
+	color: #00e5ff;
+	text-shadow: 0 0 1vmin #00e5ff88;
+	letter-spacing: 0.05vmin;
+	flex: 1;
+	text-align: left;
+}
+#lb-position-badge {
+	font-family: "Press Start 2P";
+	font-size: 1.3vmin;
+	color: white;
+	background: rgba(255,255,255,0.1);
+	border: 0.25vmin solid rgba(255,255,255,0.3);
+	border-radius: 0.8vmin;
+	padding: 0.4vmin 0.8vmin;
+	white-space: nowrap;
+}
+#lb-position-badge.pos-1st { color: #f4d03f; border-color: #f4d03f88; background: rgba(244,208,63,0.12); }
+#lb-position-badge.pos-2nd { color: #bdc3c7; border-color: #bdc3c788; background: rgba(189,195,199,0.12); }
+#lb-position-badge.pos-3rd { color: #e67e22; border-color: #e67e2288; background: rgba(230,126,34,0.12); }
+.lb-row {
+	display: flex;
+	align-items: center;
+	gap: 1.2vmin;
+	padding: 0.45vmin 0;
+	border-bottom: 0.2vmin solid rgba(255,255,255,0.1);
+	font-family: "Press Start 2P";
+	font-size: 1.4vmin;
+	color: white;
+}
+.lb-row:last-child {
+	border-bottom: none;
+}
+.lb-row.lb-me {
+	color: #f4d03f;
+}
+.lb-pos {
+	width: 2.5vmin;
+	text-align: right;
+	opacity: 0.7;
+	flex-shrink: 0;
+}
+.lb-color {
+	width: 1.4vmin;
+	height: 1.4vmin;
+	border-radius: 50%;
+	flex-shrink: 0;
+}
+.lb-name {
+	flex: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.lb-lap-col {
+	font-size: 1.1vmin;
+	opacity: 0.75;
+	flex-shrink: 0;
+	min-width: 8vmin;
+	text-align: center;
+}
+.lb-info {
+	font-size: 1.2vmin;
+	opacity: 0.85;
+	flex-shrink: 0;
+	text-align: right;
+	min-width: 16vmin;
+}
+.lb-finished {
+	color: #2ecc71;
+}
+
+/* ===== HOST LIVE SETTINGS PANEL ===== */
+#livesettings {
+	position: absolute;
+	bottom: 5vmin;
+	left: 3vmin;
+	background: rgba(0,0,0,0.7);
+	border: 0.4vmin solid rgba(255,255,255,0.35);
+	border-radius: 1.5vmin;
+	padding: 1.5vmin 2vmin;
+	z-index: 100001;
+	min-width: 30vmin;
+	color: white;
+	font-family: "Press Start 2P";
+	font-size: 1.4vmin;
+	display: none;
+}
+#livesettings-title {
+	color: #6eb0ea;
+	font-size: 1.6vmin;
+	margin-bottom: 1.2vmin;
+	text-align: center;
+}
+.ls-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1vmin;
+	margin: 0.6vmin 0;
+}
+.ls-label {
+	opacity: 0.8;
+	font-size: 1.2vmin;
+}
+.ls-controls {
+	display: flex;
+	align-items: center;
+	gap: 0.6vmin;
+}
+.ls-btn {
+	background: rgba(255,255,255,0.15);
+	border: 0.3vmin solid rgba(255,255,255,0.4);
+	color: white;
+	font-family: "Press Start 2P";
+	font-size: 1.4vmin;
+	width: 3vmin;
+	height: 3vmin;
+	cursor: pointer;
+	border-radius: 0.4vmin;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	line-height: 1;
+}
+.ls-btn:hover {
+	background: rgba(255,255,255,0.3);
+}
+.ls-val {
+	min-width: 4vmin;
+	text-align: center;
+	font-size: 1.4vmin;
 }
