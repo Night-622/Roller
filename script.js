@@ -776,10 +776,7 @@ function loadMap(){
 		cpWall.cpIndex = i; // which checkpoint this is (0-based)
 		checkpointsc.add(cpWall);
 	}
-	
 	scene.add(checkpointsc);
-	
-cpWall.visible = false;
 	
 	return document.getElementById("trackcode").innerText.trim().split("|")[4];
 }
