@@ -772,8 +772,9 @@ function loadMap(){
 			var point2 = new THREE.Vector2(x2, y2);
 			var cpWall = new THREE.Mesh(
 				new THREE.BoxBufferGeometry(point1.distanceTo(point2) * mapscale, 0.15, 1),
-				new THREE.MeshLambertMaterial({color: new THREE.Color("#f5c518"), transparent: true, opacity: 0.85})
+				new THREE.MeshLambertMaterial()
 			);
+			cpWall.visible = false; // invisible trigger zone
 			var angle = Math.atan2((point1.y - point2.y), (point1.x - point2.x));
 			cpWall.position.set(-(point1.x + point2.x) / 2 * mapscale, 0, (point1.y + point2.y) / 2 * mapscale);
 			cpWall.rotation.set(0, angle, 0, "YXZ");
@@ -1014,49 +1015,41 @@ function join(){
 						}
 					}
 
-					// ===== CHECKPOINT & LAP DETECTION =====
-					var totalCPs = checkpointsc ? checkpointsc.children.length : 0;
-					var allCPsMask = totalCPs > 0 ? (1 << totalCPs) - 1 : 0;
+					// ===== CHECKPOINT & LAP DETECTION (local player only) =====
+					if(play == players[me.ref.path.pieces_[2]]){
+						var totalCPs = checkpointsc ? checkpointsc.children.length : 0;
+						var allCPsMask = totalCPs > 0 ? (1 << totalCPs) - 1 : 0;
 
-					// Check named checkpoints (yellow lines) — set bits in mask
-					if(checkpointsc){
-						for(var ci = 0; ci < checkpointsc.children.length; ci++){
-							var cpLine = checkpointsc.children[ci];
-							// Skip if this checkpoint bit already set (avoids repeated flash spam)
-							var alreadyHit = (play.data.checkpointsMask || 0) & (1 << ci);
-							if(!alreadyHit){
+						// Named checkpoints — set bits in mask, only if not already hit
+						if(checkpointsc){
+							for(var ci = 0; ci < checkpointsc.children.length; ci++){
+								var cpLine = checkpointsc.children[ci];
+								if((play.data.checkpointsMask || 0) & (1 << ci)) continue; // already hit
 								if(Math.abs(cpLine.plane.distanceToPoint(play.model.position.clone().sub(cpLine.position))) < 1){
 									if(cpLine.position.clone().distanceTo(play.model.position) < cpLine.width / 2 + 1){
 										play.data.checkpointsMask = (play.data.checkpointsMask || 0) | (1 << ci);
-										// Flash the checkpoint yellow->white when hit (local player only)
-										if(play == players[me.ref.path.pieces_[2]]){
-											cpLine.material.color.set("#ffffff");
-											(function(mat){ setTimeout(function(){ mat.color.set("#f5c518"); }, 300); })(cpLine.material);
-										}
 									}
 								}
 							}
 						}
-					}
 
-					// Check start/finish line (index 0 = finish, index 1 = old single checkpoint)
-					for(var i in startc.children){
-						var cp = startc.children[i];
-						if(Math.abs(cp.plane.distanceToPoint(play.model.position.clone().sub(cp.position))) < 1){
-							if(cp.position.clone().distanceTo(play.model.position) < cp.width / 2 + 1){
-								if(i == 0){
-									// Finish line: only count lap if all checkpoints were hit (or no checkpoints placed)
-									var cpMask = play.data.checkpointsMask || 0;
-									if(totalCPs === 0 || cpMask === allCPsMask){
-										if(play.data.checkpoint == 1){
-											play.data.checkpoint = 0;
-											play.data.checkpointsMask = 0; // reset for next lap
-											play.data.lap++;
+						// Start/finish line
+						for(var i in startc.children){
+							var cp = startc.children[i];
+							if(Math.abs(cp.plane.distanceToPoint(play.model.position.clone().sub(cp.position))) < 1){
+								if(cp.position.clone().distanceTo(play.model.position) < cp.width / 2 + 1){
+									if(i == 0){
+										var cpMask = play.data.checkpointsMask || 0;
+										if(totalCPs === 0 || cpMask === allCPsMask){
+											if(play.data.checkpoint == 1){
+												play.data.checkpoint = 0;
+												play.data.checkpointsMask = 0;
+												play.data.lap++;
+											}
 										}
+									} else {
+										play.data.checkpoint = 1;
 									}
-								} else {
-									// Old-style single checkpoint (still supported for backwards compat)
-									play.data.checkpoint = 1;
 								}
 							}
 						}
