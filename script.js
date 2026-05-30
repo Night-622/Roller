@@ -858,24 +858,24 @@ function join(){
 if(play == players[me.ref.path.pieces_[2]] && clutchHeld){
 
 	// Clutch cuts engine power and slowly decelerates
-	play.data.xv *= Math.pow(0.985, warp);
-	play.data.yv *= Math.pow(0.985, warp);
+	if(play == players[me.ref.path.pieces_[2]] && clutchHeld){
+
+    // Clutch cuts engine power and slowly decelerates
+    play.data.xv *= Math.pow(CLUTCH_DECEL, warp);
+    play.data.yv *= Math.pow(CLUTCH_DECEL, warp);
 
 }else{
 
-	var currentSpeed = isBoosting
-		? SPEED + BOOST_STRENGTH
-		: SPEED;
+    var currentSpeed = isBoosting
+        ? SPEED + BOOST_STRENGTH
+        : SPEED;
 
-	if(!clutchHeld){
-	play.data.xv += Math.sin(play.data.dir) * currentSpeed * warp;
-	play.data.yv += Math.cos(play.data.dir) * currentSpeed * warp;
-}else{
-	play.data.xv *= Math.pow(CLUTCH_DECEL, warp);
-	play.data.yv *= Math.pow(CLUTCH_DECEL, warp);
+    play.data.xv += Math.sin(play.data.dir) * currentSpeed * warp;
+    play.data.yv += Math.cos(play.data.dir) * currentSpeed * warp;
+
 }
 
-					if(play == players[me.ref.path.pieces_[2]] && braking && !isBoosting){
+						if(play == players[me.ref.path.pieces_[2]] && braking && !isBoosting){
 						play.data.xv *= Math.pow(BRAKE_POWER, warp);
 						play.data.yv *= Math.pow(BRAKE_POWER, warp);
 						play.data.xv -= Math.sin(play.data.dir) * BRAKE_REVERSE * warp;
@@ -1510,7 +1510,6 @@ function startGame(){
 	});
 }
 
-var clutchHeld = false;
 
 window.onkeydown = function(e){
 
