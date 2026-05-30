@@ -419,7 +419,7 @@ input{
 	padding: 1.2vmin 2vmin;
 	z-index: 100001;
 	min-width: 58vmin;
-	max-width: 70vmin;
+	max-width: 72vmin;
 	backdrop-filter: blur(6px);
 	display: none;
 }
