@@ -628,7 +628,7 @@ function deleteMap(){
 	if(checkpointsc){
 		while(checkpointsc.children.length > 0)
 			checkpointsc.remove(checkpointsc.children[0]);
-		// not in scene, just clear the object
+		scene.remove(checkpointsc);
 	}
 	while(main.children.length > 0)
 		main.remove(main.children[0]);
@@ -774,7 +774,6 @@ function loadMap(){
 				new THREE.BoxBufferGeometry(point1.distanceTo(point2) * mapscale, 0.15, 1),
 				new THREE.MeshLambertMaterial()
 			);
-			cpWall.visible = false; // invisible trigger zone
 			var angle = Math.atan2((point1.y - point2.y), (point1.x - point2.x));
 			cpWall.position.set(-(point1.x + point2.x) / 2 * mapscale, 0, (point1.y + point2.y) / 2 * mapscale);
 			cpWall.rotation.set(0, angle, 0, "YXZ");
@@ -789,7 +788,9 @@ function loadMap(){
 	} catch(e) {
 		console.warn("Checkpoint parse error:", e);
 	}
-	// Don't add to scene — checkpoints are invisible trigger zones only
+	// Add to scene but invisible — needed so Three.js updates world matrices for collision
+	checkpointsc.visible = false;
+	scene.add(checkpointsc);
 
 	// Eval code: segment 5 for new format (with checkpoints), segment 4 for old format
 	var segments = document.getElementById("trackcode").innerText.trim().split("|");
