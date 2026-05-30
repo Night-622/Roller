@@ -17,7 +17,7 @@ var BOOST_DRAIN_TIME = 4000;
 var BRAKE_POWER = 0.97;
 var BRAKE_REVERSE = 0.0009;
 
-var CLUTCH_FRICTION = 1.475; // Decel rate while clutch held (lower = stops faster, higher = coasts longer; between BRAKE_POWER and 0.99)
+var CLUTCH_FRICTION = 2.975; // Decel rate while clutch held (lower = stops faster, higher = coasts longer; between BRAKE_POWER and 0.99)
 
 // Count number of set bits in a bitmask (used for checkpoint progress)
 function countBits(n){ var c = 0; while(n){ c += n & 1; n >>= 1; } return c; }
@@ -772,7 +772,7 @@ function loadMap(){
 			var point2 = new THREE.Vector2(x2, y2);
 			var cpWall = new THREE.Mesh(
 				new THREE.BoxBufferGeometry(point1.distanceTo(point2) * mapscale, 0.15, 1),
-				new THREE.MeshLambertMaterial()
+				new THREE.MeshLambertMaterial({color: new THREE.Color("#f5c518")})
 			);
 			var angle = Math.atan2((point1.y - point2.y), (point1.x - point2.x));
 			cpWall.position.set(-(point1.x + point2.x) / 2 * mapscale, 0, (point1.y + point2.y) / 2 * mapscale);
@@ -788,8 +788,7 @@ function loadMap(){
 	} catch(e) {
 		console.warn("Checkpoint parse error:", e);
 	}
-	// Add to scene but invisible — needed so Three.js updates world matrices for collision
-	checkpointsc.visible = false;
+	// Add to scene — visible checkpoint lines
 	scene.add(checkpointsc);
 
 	// Eval code: segment 5 for new format (with checkpoints), segment 4 for old format
