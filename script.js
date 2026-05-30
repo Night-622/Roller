@@ -5,7 +5,7 @@ var BOUNCE = 0.2;
 var mapscale = 5;
 var VR = false;
 var BOUNCE_CORRECT = 0.01;
-var WALL_SIZE = 2.2;
+var WALL_SIZE = 1.2;
 var MOUNTAIN_DIST = 450;
 var OOB_DIST = 500;
 var LAPS = 3;
@@ -19,15 +19,11 @@ var BRAKE_REVERSE = 0.0009;
 function MODS(){
 
 }
-
 // ===== UNIQUE PC ID =====
-// Each browser gets a persistent unique ID stored in localStorage.
-// This lets the DB track distinct machines across sessions.
 var PC_ID = (function(){
 	var key = "roller_pc_id";
 	var id = localStorage.getItem(key);
 	if(!id){
-		// Generate a random 16-char hex ID
 		id = "";
 		for(var i = 0; i < 16; i++)
 			id += Math.floor(Math.random()*16).toString(16);
@@ -35,6 +31,7 @@ var PC_ID = (function(){
 	}
 	return id;
 })();
+
 
 var serverList = [
 	{
@@ -432,7 +429,6 @@ host = function(){
 					"<div class='ls-row'><span class='ls-label'>LAPS</span><div class='ls-controls'><button class='ls-btn' onclick='lsChange(\"laps\",-1)'>-</button><span class='ls-val' id='ls-laps'>" + LAPS + "</span><button class='ls-btn' onclick='lsChange(\"laps\",1)'>+</button></div></div>" +
 					"<div class='ls-row'><span class='ls-label'>SPEED</span><div class='ls-controls'><button class='ls-btn' onclick='lsChange(\"speed\",-1)'>-</button><span class='ls-val' id='ls-speed'>x1</span><button class='ls-btn' onclick='lsChange(\"speed\",1)'>+</button></div></div>";
 				f.appendChild(lsPanel);
-
 				window.lsSpeedMult = 1;
 				window.lsChange = function(setting, delta){
 					if(setting === "laps"){
@@ -448,6 +444,8 @@ host = function(){
 
 				database.ref(code + "/players").on("child_added", function(p){
 					console.log(p);
+					if(!window._lobbyPlayers) window._lobbyPlayers = {};
+					window._lobbyPlayers[p.ref_.path.pieces_[2]] = true;
 					players[p.ref_.path.pieces_[2]] = {
 						data: p.val(),
 						model: new THREE.Mesh(new THREE.BoxBufferGeometry(1, 1, 2))
@@ -522,7 +520,6 @@ host = function(){
 					if(v == 1){
 						document.getElementsByClassName("info")[0].outerHTML = "";
 						document.getElementById("startgame").outerHTML = "";
-						// Remove live settings panel
 						var lsp = document.getElementById("livesettings");
 						if(lsp) lsp.outerHTML = "";
 
@@ -541,7 +538,6 @@ host = function(){
 						lap.id = "lap";
 						f.appendChild(lap);
 
-						// Boost bar UI
 						var boostContainer = document.createElement("DIV");
 						boostContainer.id = "boostcontainer";
 						boostContainer.style.cssText = "position:absolute;bottom:20px;left:50%;transform:translateX(-50%);width:200px;background:rgba(0,0,0,0.5);border:2px solid white;border-radius:10px;overflow:hidden;height:16px;";
@@ -554,11 +550,16 @@ host = function(){
 						// ===== LEADERBOARD =====
 						var lb = document.createElement("DIV");
 						lb.id = "leaderboard";
-						lb.innerHTML = "<div id='leaderboard-title'>RACE</div><div id='lb-rows'></div>";
+						lb.innerHTML = "<div id='leaderboard-title'>RACE</div><div id='lb-lap-timer-row'><span id='lb-lap-timer'>00:00.000</span><span id='lb-position-badge'>P1</span></div><div id='lb-rows'></div>";
 						lb.style.display = "block";
 						f.appendChild(lb);
+
 						window._raceStartTime = null;
 						window._myFinishTime = null;
+						window._lapStartTime = null;
+						window._lastTrackedLap = 0;
+						window._myLapSplits = [];
+						window._finishPositions = [];
 
 						setTimeout(function(){ countDown.innerHTML = "2"; }, 1000);
 						setTimeout(function(){ countDown.innerHTML = "1"; }, 2000);
@@ -566,6 +567,7 @@ host = function(){
 							countDown.innerHTML = "GO!";
 							gameSortaStarted = false;
 							window._raceStartTime = performance.now();
+							window._lapStartTime = performance.now();
 						}, 3000);
 						setTimeout(function(){ countDown.innerHTML = ""; }, 4000);
 					}
@@ -954,29 +956,33 @@ function join(){
 						document.getElementById("countdown").style.fontSize = "25vmin";
 						document.getElementById("countdown").innerHTML = play.data.name.replaceAll("<", "&lt;") + " Won!";
 
-						// Record win — save result to DB under /results/<gameCode>/<pcId>
-						if(play == players[me.ref.path.pieces_[2]] && !window._myFinishTime){
+						var pk2 = Object.keys(players).find(function(k){ return players[k] === play; });
+						if(pk2 && window._finishPositions && window._finishPositions.indexOf(pk2) === -1)
+							window._finishPositions.push(pk2);
+
+						if(play === players[me.ref.path.pieces_[2]] && !window._myFinishTime){
 							window._myFinishTime = window._raceStartTime ? (performance.now() - window._raceStartTime) : 0;
 							play.data.raceTime = window._myFinishTime;
 							play.data.finished = true;
+							var myPlace = window._finishPositions.indexOf(me.ref.path.pieces_[2]) + 1;
+							var lapSplits = window._myLapSplits || [];
+							var fastestLap = lapSplits.length ? Math.min.apply(null, lapSplits) : window._myFinishTime;
+							var now2 = new Date();
+							var dateKey = now2.getFullYear() + "-" + String(now2.getMonth()+1).padStart(2,"0") + "-" + String(now2.getDate()).padStart(2,"0") + " " + String(now2.getHours()).padStart(2,"0") + ":00";
+							var mapName = document.title || "Custom Track";
 							var resultData = {
-								name: me.data.name,
-								pcId: PC_ID,
-								color: me.data.color,
-								finishTime: window._myFinishTime,
-								laps: LAPS,
-								timestamp: Date.now(),
-								gameCode: code
+								name: me.data.name, pcId: PC_ID, color: me.data.color,
+								place: myPlace, totalTime: window._myFinishTime,
+								fastestLap: fastestLap, lapSplits: lapSplits,
+								laps: LAPS, speed: SPEED, map: mapName,
+								gameCode: code, timestamp: Date.now(), dateKey: dateKey
 							};
-							database.ref("results/" + code + "/" + me.ref.path.pieces_[2]).set(resultData);
-							// Also save to per-PC history
+							database.ref("games/" + dateKey + "/" + code + "/results/" + me.ref.path.pieces_[2]).set(resultData);
+							database.ref("games/" + dateKey + "/" + code + "/meta").once("value", function(ms){
+								if(!ms.val()) database.ref("games/" + dateKey + "/" + code + "/meta").set({ map: mapName, laps: LAPS, speed: SPEED, gameCode: code, dateKey: dateKey, startedAt: Date.now() - window._myFinishTime, players: Object.keys(players).length });
+							});
 							database.ref("history/" + PC_ID).push(resultData);
 						}
-					}
-
-					// Track race time for my player
-					if(play == players[me.ref.path.pieces_[2]] && window._raceStartTime && !window._myFinishTime){
-						play.data.raceTime = performance.now() - window._raceStartTime;
 					}
 
 					for(var pl in players){
@@ -1032,61 +1038,6 @@ function join(){
 			me.ref.set(me.data);
 
 			lap.innerHTML = me.data.lap <= LAPS ? me.data.lap + "/" + LAPS : "";
-
-			// ===== UPDATE LEADERBOARD =====
-			var lbRows = document.getElementById("lb-rows");
-			if(lbRows){
-				var myKey = me.ref.path.pieces_[2];
-				var lbData = [];
-				for(var pk in players){
-					var pd = players[pk].data;
-					var elapsed = 0;
-					if(window._raceStartTime){
-						if(pd.finished && pd.raceTime){
-							elapsed = pd.raceTime;
-						} else if(pk === myKey && !window._myFinishTime){
-							elapsed = performance.now() - window._raceStartTime;
-						} else {
-							elapsed = pd.raceTime || 0;
-						}
-					}
-					lbData.push({
-						key: pk,
-						name: pd.name || "?",
-						color: pd.color || 0,
-						lap: pd.lap || 0,
-						finished: pd.finished || (pd.lap > LAPS),
-						raceTime: elapsed
-					});
-				}
-				// Sort: finished first (by time), then by lap desc
-				lbData.sort(function(a, b){
-					if(a.finished && b.finished) return a.raceTime - b.raceTime;
-					if(a.finished) return -1;
-					if(b.finished) return 1;
-					return b.lap - a.lap;
-				});
-				var html = "";
-				for(var i = 0; i < lbData.length; i++){
-					var d = lbData[i];
-					var isMe = d.key === myKey;
-					var timeStr = "";
-					if(d.finished){
-						var s = d.raceTime / 1000;
-						timeStr = "<span class='lb-finished'>" + s.toFixed(2) + "s</span>";
-					} else {
-						timeStr = "L" + Math.min(d.lap, LAPS) + "/" + LAPS;
-					}
-					var colorHex = "hsl(" + d.color + ",100%,50%)";
-					html += "<div class='lb-row" + (isMe ? " lb-me" : "") + "'>" +
-						"<span class='lb-pos'>" + (i+1) + "</span>" +
-						"<span class='lb-color' style='background:" + colorHex + "'></span>" +
-						"<span class='lb-name'>" + d.name.replaceAll("<","&lt;").substring(0,12) + "</span>" +
-						"<span class='lb-info'>" + timeStr + "</span>" +
-						"</div>";
-				}
-				lbRows.innerHTML = html;
-			}
 		}else{
 			camera.position.set(50 * Math.sin(x), 20, 50 * Math.cos(x));
 			camera.lookAt(player.position);
@@ -1277,12 +1228,11 @@ codeCheck = function(){
 						f.appendChild(countDown);
 
 						lap = document.createElement("DIV");
-						lap.innerHTML = "1/3";
+						lap.innerHTML = "1/" + LAPS;
 						lap.className = "title";
 						lap.id = "lap";
 						f.appendChild(lap);
 
-						// Boost bar UI
 						var boostContainer = document.createElement("DIV");
 						boostContainer.id = "boostcontainer";
 						boostContainer.style.cssText = "position:absolute;bottom:20px;left:50%;transform:translateX(-50%);width:200px;background:rgba(0,0,0,0.5);border:2px solid white;border-radius:10px;overflow:hidden;height:16px;";
@@ -1295,11 +1245,16 @@ codeCheck = function(){
 						// ===== LEADERBOARD =====
 						var lb = document.createElement("DIV");
 						lb.id = "leaderboard";
-						lb.innerHTML = "<div id='leaderboard-title'>RACE</div><div id='lb-rows'></div>";
+						lb.innerHTML = "<div id='leaderboard-title'>RACE</div><div id='lb-lap-timer-row'><span id='lb-lap-timer'>00:00.000</span><span id='lb-position-badge'>P1</span></div><div id='lb-rows'></div>";
 						lb.style.display = "block";
 						f.appendChild(lb);
+
 						window._raceStartTime = null;
 						window._myFinishTime = null;
+						window._lapStartTime = null;
+						window._lastTrackedLap = 0;
+						window._myLapSplits = [];
+						window._finishPositions = [];
 
 						setTimeout(function(){ countDown.innerHTML = "2"; }, 1000);
 						setTimeout(function(){ countDown.innerHTML = "1"; }, 2000);
@@ -1307,6 +1262,7 @@ codeCheck = function(){
 							countDown.innerHTML = "GO!";
 							gameSortaStarted = false;
 							window._raceStartTime = performance.now();
+							window._lapStartTime = performance.now();
 						}, 3000);
 						setTimeout(function(){ countDown.innerHTML = ""; }, 4000);
 					}
@@ -1314,10 +1270,7 @@ codeCheck = function(){
 				// Sync settings from host
 				database.ref(code + "/settings").on("value", function(sv){
 					var s = sv.val();
-					if(s){
-						if(typeof s.laps === "number") LAPS = s.laps;
-						if(typeof s.speed === "number") SPEED = s.speed;
-					}
+					if(s){ if(typeof s.laps==="number") LAPS=s.laps; if(typeof s.speed==="number") SPEED=s.speed; }
 				});
 				database.ref(code + "/map").once("value", function(e){
 					document.getElementById("trackcode").innerHTML = e.val();
@@ -1336,6 +1289,9 @@ codeCheck = function(){
 
 function startGame(){
 	database.ref(code + "/status").set(1);
+	var now = new Date();
+	var dateKey = now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-"+String(now.getDate()).padStart(2,"0")+" "+String(now.getHours()).padStart(2,"0")+":00";
+	database.ref("games/"+dateKey+"/"+code+"/meta").set({ map: document.title||"Custom Track", laps: LAPS, speed: SPEED, gameCode: code, dateKey: dateKey, startedAt: Date.now(), hostPcId: PC_ID, players: Object.keys(window._lobbyPlayers||{}).length||1 });
 }
 
 window.onkeydown = function(e){
