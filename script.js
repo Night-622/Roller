@@ -452,9 +452,6 @@ host = function(){
 						data: p.val(),
 						model: new THREE.Mesh(new THREE.BoxBufferGeometry(1, 1, 2))
 					};
-					// Track for startGame player count
-					if(!window._lobbyPlayers) window._lobbyPlayers = {};
-					window._lobbyPlayers[p.ref_.path.pieces_[2]] = true;
 					var pl = players[p.ref_.path.pieces_[2]];
 					pl.model.position.set(pl.data.x, 0.6, pl.data.y);
 					pl.model.material = new THREE.MeshLambertMaterial({color: new THREE.Color("hsl(" + pl.data.color + ", 100%, 50%)")});
@@ -958,75 +955,23 @@ function join(){
 						document.getElementById("countdown").style.fontSize = "25vmin";
 						document.getElementById("countdown").innerHTML = play.data.name.replaceAll("<", "&lt;") + " Won!";
 
-						// ===== RECORD FINISH =====
+						// Record win — save result to DB under /results/<gameCode>/<pcId>
 						if(play == players[me.ref.path.pieces_[2]] && !window._myFinishTime){
 							window._myFinishTime = window._raceStartTime ? (performance.now() - window._raceStartTime) : 0;
 							play.data.raceTime = window._myFinishTime;
 							play.data.finished = true;
-
-							// Work out finishing position from other players already done
-							if(!window._finishPositions) window._finishPositions = [];
-							window._finishPositions.push(me.ref.path.pieces_[2]);
-							var myPlace = window._finishPositions.length;
-
-							// Fastest lap from recorded lap splits
-							var lapSplits = window._myLapSplits || [];
-							var fastestLap = lapSplits.length ? Math.min.apply(null, lapSplits) : window._myFinishTime;
-
-							// Date key: "YYYY-MM-DD HH:00" (nearest hour)
-							var now = new Date();
-							var dateKey = now.getFullYear() + "-" +
-								String(now.getMonth()+1).padStart(2,"0") + "-" +
-								String(now.getDate()).padStart(2,"0") + " " +
-								String(now.getHours()).padStart(2,"0") + ":00";
-
-							// Map name from <title> tag or fallback
-							var mapName = (document.querySelector("#trackcode [data-name]") || {}).dataset &&
-								document.querySelector("#trackcode [data-name]").dataset.name ||
-								document.title || "Custom Track";
-
 							var resultData = {
 								name: me.data.name,
 								pcId: PC_ID,
 								color: me.data.color,
-								place: myPlace,
-								totalTime: window._myFinishTime,
-								fastestLap: fastestLap,
-								lapSplits: lapSplits,
+								finishTime: window._myFinishTime,
 								laps: LAPS,
-								speed: parseFloat(SPEED.toFixed(6)),
-								map: mapName,
-								gameCode: code,
 								timestamp: Date.now(),
-								dateKey: dateKey
+								gameCode: code
 							};
-
-							// /games/<dateKey>/<gameCode>/results/<playerKey>
-							database.ref("games/" + dateKey + "/" + code + "/results/" + me.ref.path.pieces_[2]).set(resultData);
-							// /games/<dateKey>/<gameCode>/meta — written once by first finisher
-							database.ref("games/" + dateKey + "/" + code + "/meta").once("value", function(ms){
-								if(!ms.val()){
-									database.ref("games/" + dateKey + "/" + code + "/meta").set({
-										map: mapName,
-										laps: LAPS,
-										speed: parseFloat(SPEED.toFixed(6)),
-										gameCode: code,
-										dateKey: dateKey,
-										startedAt: window._raceStartTime ? (Date.now() - window._myFinishTime) : Date.now(),
-										players: Object.keys(players).length
-									});
-								}
-							});
-							// Per-PC history
+							database.ref("results/" + code + "/" + me.ref.path.pieces_[2]).set(resultData);
+							// Also save to per-PC history
 							database.ref("history/" + PC_ID).push(resultData);
-						} else if(!window._finishPositions){
-							window._finishPositions = [];
-						}
-
-						// Track other players finishing (for position counting)
-						var pk2 = Object.keys(players).find(function(k){ return players[k] == play; });
-						if(pk2 && window._finishPositions && window._finishPositions.indexOf(pk2) === -1){
-							window._finishPositions.push(pk2);
 						}
 					}
 
@@ -1034,13 +979,9 @@ function join(){
 					if(play == players[me.ref.path.pieces_[2]] && window._raceStartTime && !window._myFinishTime){
 						play.data.raceTime = performance.now() - window._raceStartTime;
 
-						// Lap timer - reset when lap increases, record split
+						// Lap timer - reset when lap increases
 						if(typeof window._lastTrackedLap === "undefined") window._lastTrackedLap = 0;
-						if(!window._myLapSplits) window._myLapSplits = [];
-						if(!window._finishPositions) window._finishPositions = [];
-						if(play.data.lap > window._lastTrackedLap && window._lapStartTime){
-							var splitTime = performance.now() - window._lapStartTime;
-							window._myLapSplits.push(Math.round(splitTime));
+						if(play.data.lap > window._lastTrackedLap){
 							window._lastTrackedLap = play.data.lap;
 							window._lapStartTime = performance.now();
 						}
@@ -1463,24 +1404,6 @@ codeCheck = function(){
 
 function startGame(){
 	database.ref(code + "/status").set(1);
-
-	// Write initial game session record under /games/<dateKey>/<code>/meta
-	var now = new Date();
-	var dateKey = now.getFullYear() + "-" +
-		String(now.getMonth()+1).padStart(2,"0") + "-" +
-		String(now.getDate()).padStart(2,"0") + " " +
-		String(now.getHours()).padStart(2,"0") + ":00";
-	var mapName = document.title || "Custom Track";
-	database.ref("games/" + dateKey + "/" + code + "/meta").set({
-		map: mapName,
-		laps: LAPS,
-		speed: parseFloat(SPEED.toFixed(6)),
-		gameCode: code,
-		dateKey: dateKey,
-		startedAt: Date.now(),
-		hostPcId: PC_ID,
-		players: Object.keys(window._lobbyPlayers || {}).length || 1
-	});
 }
 
 window.onkeydown = function(e){
