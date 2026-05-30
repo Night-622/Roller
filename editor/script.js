@@ -317,10 +317,10 @@ function imp(){
 		});
 	}
 
-	// Parse checkpoints (segment index 5)
+	// Parse checkpoints (segment index 4)
 	checkpoints = [];
-	if(text.length >= 6){
-		var cpText = text[5].split(" ");
+	if(text.length >= 5){
+		var cpText = text[4].split(" ");
 		for(var i = 0; i < cpText.length; i++){
 			var t = cpText[i].split("/");
 			if(t.length < 2)
