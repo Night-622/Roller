@@ -518,7 +518,7 @@ host = function(){
 					color: color,
 					name: name,
 					checkpoint: 1,
-					checkpointsMask: 0,
+					cpProgress: 0,
 					lap: 0,
 					collision: {},
 					pcId: PC_ID,
@@ -1019,18 +1019,16 @@ function join(){
 					if(play == players[me.ref.path.pieces_[2]]){
 						var totalCPs = checkpointsc ? checkpointsc.children.length : 0;
 
-						// Named checkpoints — track which ones hit this lap in a local Set
-						// play.data.cpHits is a plain object {index: true} stored on data
-						if(!window._cpHits) window._cpHits = {};
+						// Sequential checkpoint system — only the NEXT expected checkpoint triggers
+						// window._cpNext = index of next checkpoint to hit (0-based)
+						if(typeof window._cpNext === "undefined") window._cpNext = 0;
 
-						if(checkpointsc){
-							for(var ci = 0; ci < checkpointsc.children.length; ci++){
-								if(window._cpHits[ci]) continue; // already hit this lap
-								var cpLine = checkpointsc.children[ci];
-								if(Math.abs(cpLine.plane.distanceToPoint(play.model.position.clone().sub(cpLine.position))) < 1){
-									if(cpLine.position.clone().distanceTo(play.model.position) < cpLine.width / 2 + 1){
-										window._cpHits[ci] = true;
-									}
+						if(checkpointsc && totalCPs > 0 && window._cpNext < totalCPs){
+							var cpLine = checkpointsc.children[window._cpNext];
+							if(Math.abs(cpLine.plane.distanceToPoint(play.model.position.clone().sub(cpLine.position))) < 1){
+								if(cpLine.position.clone().distanceTo(play.model.position) < cpLine.width / 2 + 1){
+									window._cpNext++;
+									play.data.cpProgress = window._cpNext;
 								}
 							}
 						}
@@ -1041,12 +1039,11 @@ function join(){
 							if(Math.abs(cp.plane.distanceToPoint(play.model.position.clone().sub(cp.position))) < 1){
 								if(cp.position.clone().distanceTo(play.model.position) < cp.width / 2 + 1){
 									if(i == 0){
-										var hitsCount = Object.keys(window._cpHits).length;
-										if(totalCPs === 0 || hitsCount >= totalCPs){
+										if(totalCPs === 0 || window._cpNext >= totalCPs){
 											if(play.data.checkpoint == 1){
 												play.data.checkpoint = 0;
-												play.data.checkpointsMask = 0;
-												window._cpHits = {}; // reset for next lap
+												window._cpNext = 0;
+												play.data.cpProgress = 0;
 												play.data.lap++;
 											}
 										}
@@ -1247,8 +1244,8 @@ function join(){
 							elapsed = pd.raceTime || 0;
 						}
 					}
-					// Progress score: each lap = totalCPs+1 steps, plus how many CPs hit this lap
-					var cpHit = totalCPsLB > 0 ? countBits(pd.checkpointsMask || 0) : 0;
+					// Progress: lap * (totalCPs+1) + checkpoints hit this lap
+					var cpHit = pd.cpProgress || 0;
 					var progress = (pd.lap || 0) * (totalCPsLB + 1) + cpHit;
 					lbData.push({
 						key: pk,
@@ -1484,7 +1481,7 @@ codeCheck = function(){
 					color: color,
 					name: name,
 					checkpoint: 1,
-					checkpointsMask: 0,
+					cpProgress: 0,
 					lap: 0,
 					collision: {},
 					pcId: PC_ID,
