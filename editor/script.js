@@ -2,6 +2,7 @@ var walls = [];
 var start = [];
 var trees = [];
 var arrows = [];
+var checkpoints = []; // numbered checkpoint lines (yellow) — all must be crossed for a valid lap
 var erase = [];
 var hist = [];
 
@@ -85,6 +86,23 @@ function update(){
 		c.lineTo(scale * start[i].end.x, scale * start[i].end.y);
 	}
 	c.stroke();
+	// Draw checkpoints in yellow with numbers
+	c.strokeStyle="#f5c518";
+	c.lineWidth = 3;
+	c.beginPath();
+	for(var i = 0; i < checkpoints.length; i++){
+		c.moveTo(scale * checkpoints[i].start.x, scale * checkpoints[i].start.y);
+		c.lineTo(scale * checkpoints[i].end.x, scale * checkpoints[i].end.y);
+	}
+	c.stroke();
+	c.lineWidth = 2;
+	c.fillStyle="#f5c518";
+	c.font = "bold " + Math.max(10, scale * 0.9) + "px sans-serif";
+	for(var i = 0; i < checkpoints.length; i++){
+		var mx = (checkpoints[i].start.x + checkpoints[i].end.x) / 2;
+		var my = (checkpoints[i].start.y + checkpoints[i].end.y) / 2;
+		c.fillText("CP" + (i + 1), scale * mx + 3, scale * my - 3);
+	}
 	c.fillStyle="#08cc3c";
 	for(var i = 0; i < trees.length; i++){
 		c.beginPath();
@@ -104,8 +122,10 @@ update();
 
 function select(n){
 	sel = n;
-	for(var i = 0; i < s.children.length - 1; i++)
-		s.children[i].className = "button" + (i == n ? " selected" : "");
+	// Highlight only the tool buttons (indices 0-5), not Import/Export/etc.
+	var toolButtons = [0, 1, 2, 3, 4, 5];
+	for(var i = 0; i < s.children.length; i++)
+		s.children[i].className = "button" + (toolButtons.indexOf(i) >= 0 && i == n ? " selected" : "");
 }
 
 function gridX(x){
@@ -157,6 +177,17 @@ ca.onmousedown = function(e){
 		});
 	if(sel == 4)
 		eraseL(gridX(mouse.cur.x), gridY(mouse.cur.y));
+	if(sel == 5)
+		checkpoints.push({
+			start: {
+				x: gridX(mouse.start.x),
+				y: gridY(mouse.start.y)
+			},
+			end: {
+				x: gridX(mouse.start.x),
+				y: gridY(mouse.start.y)
+			}
+		});
 }
 
 ca.onmousemove = function(e){
@@ -181,6 +212,10 @@ ca.onmousemove = function(e){
 		arrows[arrows.length - 1].angle = Math.atan2(mouse.start.y - mouse.cur.y, mouse.start.x - mouse.cur.x);
 	if(sel == 4 && mouse.down)
 		eraseL(gridX(mouse.cur.x), gridY(mouse.cur.y));
+	if(sel == 5 && mouse.down){
+		checkpoints[checkpoints.length - 1].end.x = gridX(mouse.cur.x);
+		checkpoints[checkpoints.length - 1].end.y = gridY(mouse.cur.y);
+	}
 }
 
 ca.onmouseup = function(e){
@@ -203,6 +238,10 @@ ca.onmouseup = function(e){
 			
 			y: gridY(mouse.end.y)
 		};
+	if(sel == 5){
+		checkpoints[checkpoints.length - 1].end.x = gridX(mouse.end.x);
+		checkpoints[checkpoints.length - 1].end.y = gridY(mouse.end.y);
+	}
 	hist.push(sel);
 	//console.log(hist);
 }
@@ -277,6 +316,27 @@ function imp(){
 			angle: (90 - parseInt(t[1])) * Math.PI / 180
 		});
 	}
+
+	// Parse checkpoints (segment index 5)
+	checkpoints = [];
+	if(text.length >= 6){
+		var cpText = text[5].split(" ");
+		for(var i = 0; i < cpText.length; i++){
+			var t = cpText[i].split("/");
+			if(t.length < 2)
+				continue;
+			checkpoints.push({
+				start: {
+					x: parseInt(t[0].split(",")[0]) + Math.floor(width / scale / 2),
+					y: -parseInt(t[0].split(",")[1]) + Math.floor(height / scale / 2)
+				},
+				end: {
+					x: parseInt(t[1].split(",")[0]) + Math.floor(width / scale / 2),
+					y: -parseInt(t[1].split(",")[1]) + Math.floor(height / scale / 2)
+				}
+			});
+		}
+	}
 }
 
 function exp(){
@@ -306,6 +366,14 @@ function exp(){
 		text += Math.floor(90 - arrows[i].angle * 180 / Math.PI) + " ";
 	}
 	text += "|";
+	// Segment 5: checkpoints
+	for(var i = 0; i < checkpoints.length; i++){
+		text += checkpoints[i].start.x - Math.floor(width / scale / 2) + ",";
+		text += -1 * (checkpoints[i].start.y - Math.floor(height / scale / 2)) + "/";
+		text += checkpoints[i].end.x - Math.floor(width / scale / 2) + ",";
+		text += -1 * (checkpoints[i].end.y - Math.floor(height / scale / 2)) + " ";
+	}
+	text += "|";
 	text += "<br/>";
 	var win = window.open();
 	win.document.body.innerHTML = text;
@@ -316,7 +384,7 @@ document.body.onkeydown = function(e){
 		//console.log(hist);
 		e.preventDefault();
 		var a = hist.splice(hist.length - 1, 1)[0];
-		var ar = [walls, start, trees, arrows, erase][a];
+		var ar = [walls, start, trees, arrows, erase, checkpoints][a];
 		var del = ar.splice(ar.length - 1, 1)[0];
 		if(ar == erase){
 			del.list.splice(del.pos, 0, del.ob);
@@ -357,6 +425,15 @@ function eraseL(x, y){
 			erase.push({
 				list: arrows,
 				ob: arrows.splice(i, 1)[0],
+				pos: i
+			});
+		}
+	for(var i = 0; i < checkpoints.length; i++)
+		if(Math.hypot(checkpoints[i].start.x - x, checkpoints[i].start.y - y) < 1 || Math.hypot(checkpoints[i].end.x - x, checkpoints[i].end.y - y) < 1){
+			hist.push(sel);
+			erase.push({
+				list: checkpoints,
+				ob: checkpoints.splice(i, 1)[0],
 				pos: i
 			});
 		}
