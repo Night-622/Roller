@@ -52,9 +52,10 @@ function setupLapTimePanel(){
 	].join(";");
 	ltPanel.innerHTML =
 		"<div id='lt-current'  style='font-size:2vmin'>LAP &nbsp;--:--.---</div>" +
-		"<div id='lt-best'     style='font-size:1.6vmin;color:#f5c518'>BEST --:--.---</div>" +
-		"<div id='lt-overall'  style='font-size:1.4vmin;color:#7df'>RECORD --:--.--- (?)</div>" +
-		"<div id='lt-rankings' style='margin-top:6px;font-size:1.3vmin;text-align:left;'></div>";
+		"<div id='lt-best'     style='font-size:1.6vmin;color:#f5c518;margin-top:2px'>BEST --:--.---</div>" +
+		"<div id='lt-overall'  style='font-size:1.4vmin;color:#7df;margin-top:2px'>RECORD --:--.--- (?)</div>" +
+		"<div style='border-top:1px solid rgba(255,255,255,0.3);margin:6px 0'></div>" +
+		"<div id='lt-rankings' style='font-size:1.3vmin;text-align:left'></div>";
 	document.getElementById("fore").appendChild(ltPanel);
 
 	// Fetch overall best lap for this map from Firebase
@@ -1261,12 +1262,7 @@ function join(){
 				var myKey = me.ref.path.pieces_[2];
 				var myData = me.data;
 
-				// ---- Lap timer: reset on each new lap ----
-				var myLap = Math.min(myData.lap || 1, LAPS);
-				if(window._lapStartTime && window._lastTrackedLap !== myLap){
-					window._lapStartTime = performance.now();
-					window._lastTrackedLap = myLap;
-				}
+				// ---- Lap timer: driven purely by _lapStartTime reset in physics loop ----
 				var lapElapsed = (window._lapStartTime && !window._myFinishTime)
 					? performance.now() - window._lapStartTime : 0;
 
@@ -1274,7 +1270,7 @@ function join(){
 				var ltEl = document.getElementById("lb-lap-timer");
 				if(ltEl) ltEl.textContent = window._myFinishTime ? "DONE" : fmtLapTime(lapElapsed);
 
-				// ---- Top-right lap time panel ----
+				// ---- Top-centre lap time panel ----
 				var ltCur = document.getElementById("lt-current");
 				var ltBest = document.getElementById("lt-best");
 				var ltOverall = document.getElementById("lt-overall");
