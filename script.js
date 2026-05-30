@@ -580,7 +580,15 @@ host = function(){
 							window._lapStartTime = performance.now();
 						}, 3000);
 						setTimeout(function(){ countDown.innerHTML = ""; }, 4000);
-}
+					}  // end if(v == 1)
+				}); // end status.on
+			}else
+				getCode();
+		}); // end codeCheck.once
+	}  // end getCode
+
+	join();
+}  // end host
 
 joinGame = function(){
 	document.getElementById("join").onclick = null;
