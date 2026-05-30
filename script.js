@@ -628,7 +628,7 @@ function deleteMap(){
 	if(checkpointsc){
 		while(checkpointsc.children.length > 0)
 			checkpointsc.remove(checkpointsc.children[0]);
-		scene.remove(checkpointsc);
+		// not in scene, just clear the object
 	}
 	while(main.children.length > 0)
 		main.remove(main.children[0]);
@@ -789,7 +789,7 @@ function loadMap(){
 	} catch(e) {
 		console.warn("Checkpoint parse error:", e);
 	}
-	scene.add(checkpointsc);
+	// Don't add to scene — checkpoints are invisible trigger zones only
 
 	// Eval code: segment 5 for new format (with checkpoints), segment 4 for old format
 	var segments = document.getElementById("trackcode").innerText.trim().split("|");
@@ -1018,16 +1018,18 @@ function join(){
 					// ===== CHECKPOINT & LAP DETECTION (local player only) =====
 					if(play == players[me.ref.path.pieces_[2]]){
 						var totalCPs = checkpointsc ? checkpointsc.children.length : 0;
-						var allCPsMask = totalCPs > 0 ? (1 << totalCPs) - 1 : 0;
 
-						// Named checkpoints — set bits in mask, only if not already hit
+						// Named checkpoints — track which ones hit this lap in a local Set
+						// play.data.cpHits is a plain object {index: true} stored on data
+						if(!window._cpHits) window._cpHits = {};
+
 						if(checkpointsc){
 							for(var ci = 0; ci < checkpointsc.children.length; ci++){
+								if(window._cpHits[ci]) continue; // already hit this lap
 								var cpLine = checkpointsc.children[ci];
-								if((play.data.checkpointsMask || 0) & (1 << ci)) continue; // already hit
 								if(Math.abs(cpLine.plane.distanceToPoint(play.model.position.clone().sub(cpLine.position))) < 1){
 									if(cpLine.position.clone().distanceTo(play.model.position) < cpLine.width / 2 + 1){
-										play.data.checkpointsMask = (play.data.checkpointsMask || 0) | (1 << ci);
+										window._cpHits[ci] = true;
 									}
 								}
 							}
@@ -1039,11 +1041,12 @@ function join(){
 							if(Math.abs(cp.plane.distanceToPoint(play.model.position.clone().sub(cp.position))) < 1){
 								if(cp.position.clone().distanceTo(play.model.position) < cp.width / 2 + 1){
 									if(i == 0){
-										var cpMask = play.data.checkpointsMask || 0;
-										if(totalCPs === 0 || cpMask === allCPsMask){
+										var hitsCount = Object.keys(window._cpHits).length;
+										if(totalCPs === 0 || hitsCount >= totalCPs){
 											if(play.data.checkpoint == 1){
 												play.data.checkpoint = 0;
 												play.data.checkpointsMask = 0;
+												window._cpHits = {}; // reset for next lap
 												play.data.lap++;
 											}
 										}
