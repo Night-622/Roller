@@ -985,8 +985,10 @@ function join(){
 						play.data.yv -= Math.cos(play.data.dir) * BRAKE_REVERSE * warp;
 					} else {
 						// Normal rolling friction (same whether clutching or not)
-						play.data.xv *= Math.pow(0.99, warp);
-						play.data.yv *= Math.pow(0.99, warp);
+						var friction = isClutching ? CLUTCH_FRICTION : 0.99;
+
+play.data.xv *= Math.pow(friction, warp);
+play.data.yv *= Math.pow(friction, warp);
 					}
 
 					play.data.x += play.data.xv * warp;
@@ -1196,6 +1198,10 @@ function join(){
 						if(play.data.lap > window._lastTrackedLap && window._lapStartTime){
 							var splitTime = performance.now() - window._lapStartTime;
 							window._myLapSplits.push(Math.round(splitTime));
+							play.data.bestLap = Math.min.apply(
+    null,
+    window._myLapSplits
+);
 							window._lastTrackedLap = play.data.lap;
 							window._lapStartTime = performance.now();
 						}
@@ -1280,6 +1286,44 @@ function join(){
 				var ltOverall = document.getElementById("lt-overall");
 				if(ltCur) ltCur.textContent = window._myFinishTime ? "DONE" : ("LAP  " + fmtLapTime(lapElapsed));
 				if(ltBest){
+					var dbRec = document.getElementById("dbrecord");
+var curRec = document.getElementById("currentrecord");
+var myRec = document.getElementById("myrecord");
+
+if(dbRec && window._overallBestLap){
+    dbRec.innerHTML =
+        "DB Record: " +
+        fmtLapTime(window._overallBestLap) +
+        " (" +
+        (window._overallBestName || "?") +
+        ")";
+}
+
+var raceBest = Infinity;
+var raceBestName = "";
+
+for(var pk in players){
+    var pd = players[pk].data;
+
+    if(pd.bestLap && pd.bestLap < raceBest){
+        raceBest = pd.bestLap;
+        raceBestName = pd.name;
+    }
+}
+
+if(curRec){
+    curRec.innerHTML =
+        raceBest < Infinity
+            ? "Race Best: " + fmtLapTime(raceBest) + " (" + raceBestName + ")"
+            : "Race Best: --:--.---";
+}
+
+if(myRec){
+    myRec.innerHTML =
+        window._sessionBestLap
+            ? "Your Best: " + fmtLapTime(window._sessionBestLap)
+            : "Your Best: --:--.---";
+}
 					var splits = window._myLapSplits || [];
 					if(splits.length > 0){
 						var sessionBest = Math.min.apply(null, splits);
