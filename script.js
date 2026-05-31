@@ -52,9 +52,10 @@ function setupLapTimePanel(){
 	].join(";");
 	ltPanel.innerHTML =
 		"<div id='lt-current'  style='font-size:2vmin'>LAP &nbsp;--:--.---</div>" +
-		"<div id='lt-best'     style='font-size:1.6vmin;color:#f5c518'>BEST --:--.---</div>" +
-		"<div id='lt-overall'  style='font-size:1.4vmin;color:#7df'>RECORD --:--.--- (?)</div>" +
-		"<div id='lt-rankings' style='margin-top:6px;font-size:1.3vmin;text-align:left;'></div>";
+		"<div id='lt-best'     style='font-size:1.6vmin;color:#f5c518;margin-top:2px'>BEST --:--.---</div>" +
+		"<div id='lt-overall'  style='font-size:1.4vmin;color:#7df;margin-top:2px'>RECORD --:--.--- (?)</div>" +
+		"<div style='border-top:1px solid rgba(255,255,255,0.3);margin:6px 0'></div>" +
+		"<div id='lt-rankings' style='font-size:1.3vmin;text-align:left'></div>";
 	document.getElementById("fore").appendChild(ltPanel);
 
 	// Fetch overall best lap for this map from Firebase
@@ -985,12 +986,11 @@ function join(){
 						play.data.yv -= Math.cos(play.data.dir) * BRAKE_REVERSE * warp;
 					} else {
 						// Normal rolling friction (same whether clutching or not)
-						var friction = isClutching ? CLUTCH_FRICTION : 0.99;
+					var friction = isClutching ? CLUTCH_FRICTION : 0.99;
 
-play.data.xv *= Math.pow(friction, warp);
-play.data.yv *= Math.pow(friction, warp);
-					}
-
+						play.data.xv *= Math.pow(friction, warp);
+						play.data.yv *= Math.pow(friction, warp);
+						
 					play.data.x += play.data.xv * warp;
 					play.data.y += play.data.yv * warp;
 
@@ -1198,10 +1198,6 @@ play.data.yv *= Math.pow(friction, warp);
 						if(play.data.lap > window._lastTrackedLap && window._lapStartTime){
 							var splitTime = performance.now() - window._lapStartTime;
 							window._myLapSplits.push(Math.round(splitTime));
-							play.data.bestLap = Math.min.apply(
-    null,
-    window._myLapSplits
-);
 							window._lastTrackedLap = play.data.lap;
 							window._lapStartTime = performance.now();
 						}
@@ -1259,7 +1255,7 @@ play.data.yv *= Math.pow(friction, warp);
 
 			me.ref.set(me.data);
 
-			lap.innerHTML = me.data.lap <= LAPS ? me.data.lap + "/" + LAPS : "";
+			lap.innerHTML = me.data.lap <= LAPS ? (me.data.lap + 1) + "/" + LAPS : "";
 
 			// ===== UPDATE LEADERBOARD =====
 			var lbRows = document.getElementById("lb-rows");
@@ -1267,12 +1263,7 @@ play.data.yv *= Math.pow(friction, warp);
 				var myKey = me.ref.path.pieces_[2];
 				var myData = me.data;
 
-				// ---- Lap timer: reset on each new lap ----
-				var myLap = Math.min(myData.lap || 1, LAPS);
-				if(window._lapStartTime && window._lastTrackedLap !== myLap){
-					window._lapStartTime = performance.now();
-					window._lastTrackedLap = myLap;
-				}
+				// ---- Lap timer: driven purely by _lapStartTime reset in physics loop ----
 				var lapElapsed = (window._lapStartTime && !window._myFinishTime)
 					? performance.now() - window._lapStartTime : 0;
 
@@ -1280,50 +1271,12 @@ play.data.yv *= Math.pow(friction, warp);
 				var ltEl = document.getElementById("lb-lap-timer");
 				if(ltEl) ltEl.textContent = window._myFinishTime ? "DONE" : fmtLapTime(lapElapsed);
 
-				// ---- Top-right lap time panel ----
+				// ---- Top-centre lap time panel ----
 				var ltCur = document.getElementById("lt-current");
 				var ltBest = document.getElementById("lt-best");
 				var ltOverall = document.getElementById("lt-overall");
 				if(ltCur) ltCur.textContent = window._myFinishTime ? "DONE" : ("LAP  " + fmtLapTime(lapElapsed));
 				if(ltBest){
-					var dbRec = document.getElementById("dbrecord");
-var curRec = document.getElementById("currentrecord");
-var myRec = document.getElementById("myrecord");
-
-if(dbRec && window._overallBestLap){
-    dbRec.innerHTML =
-        "DB Record: " +
-        fmtLapTime(window._overallBestLap) +
-        " (" +
-        (window._overallBestName || "?") +
-        ")";
-}
-
-var raceBest = Infinity;
-var raceBestName = "";
-
-for(var pk in players){
-    var pd = players[pk].data;
-
-    if(pd.bestLap && pd.bestLap < raceBest){
-        raceBest = pd.bestLap;
-        raceBestName = pd.name;
-    }
-}
-
-if(curRec){
-    curRec.innerHTML =
-        raceBest < Infinity
-            ? "Race Best: " + fmtLapTime(raceBest) + " (" + raceBestName + ")"
-            : "Race Best: --:--.---";
-}
-
-if(myRec){
-    myRec.innerHTML =
-        window._sessionBestLap
-            ? "Your Best: " + fmtLapTime(window._sessionBestLap)
-            : "Your Best: --:--.---";
-}
 					var splits = window._myLapSplits || [];
 					if(splits.length > 0){
 						var sessionBest = Math.min.apply(null, splits);
@@ -1407,7 +1360,7 @@ if(myRec){
 				for(var i = 0; i < lbData.length; i++){
 					var d = lbData[i];
 					var isMe = d.key === myKey;
-					var lapCol = "L" + Math.min(d.lap, LAPS) + "/" + LAPS;
+					var lapCol = "L" + Math.min(d.lap + 1, LAPS) + "/" + LAPS;
 					if(totalCPsLB > 0 && !d.finished)
 						lapCol += " CP" + d.cpHit + "/" + totalCPsLB;
 					var timeStr = "";
@@ -1599,7 +1552,7 @@ codeCheck = function(){
 					name: name,
 					checkpoint: 1,
 					cpProgress: 0,
-					lap: 1,
+					lap: 0,
 					collision: {},
 					pcId: PC_ID,
 					raceTime: 0,
