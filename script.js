@@ -1268,20 +1268,38 @@ function join(){
 					window._lastTrackedLap = myLap;
 				}
 				var lapElapsed = (window._lapStartTime && !window._myFinishTime)
-					? performance.now() - window._lapStartTime
-					: (window._myFinishTime ? 0 : 0);
+					? performance.now() - window._lapStartTime : 0;
+
+				// Update leaderboard lap timer
 				var ltEl = document.getElementById("lb-lap-timer");
-				if(ltEl && !window._myFinishTime){
-					var lm = Math.floor(lapElapsed / 60000);
-					var ls = Math.floor((lapElapsed % 60000) / 1000);
-					var lms = Math.floor(lapElapsed % 1000);
-					ltEl.textContent =
-						String(lm).padStart(2,"0") + ":" +
-						String(ls).padStart(2,"0") + "." +
-						String(lms).padStart(3,"0");
-				} else if(ltEl && window._myFinishTime){
-					ltEl.textContent = "DONE";
-				}				// ---- Build sorted data ----
+				if(ltEl) ltEl.textContent = window._myFinishTime ? "DONE" : fmtLapTime(lapElapsed);
+
+				// ---- Top-right lap time panel ----
+				var ltCur = document.getElementById("lt-current");
+				var ltBest = document.getElementById("lt-best");
+				var ltOverall = document.getElementById("lt-overall");
+				if(ltCur) ltCur.textContent = window._myFinishTime ? "DONE" : ("LAP  " + fmtLapTime(lapElapsed));
+				if(ltBest){
+					var splits = window._myLapSplits || [];
+					if(splits.length > 0){
+						var sessionBest = Math.min.apply(null, splits);
+						if(!window._sessionBestLap || sessionBest < window._sessionBestLap){
+							window._sessionBestLap = sessionBest;
+							if(!window._overallBestLap || sessionBest < window._overallBestLap){
+								window._overallBestLap = sessionBest;
+								window._overallBestName = me.data.name;
+								var mapKey = (document.title || "track").replace(/[^a-zA-Z0-9_]/g,"_");
+								database.ref("bestlaps/" + mapKey).set({ lapTime: sessionBest, name: me.data.name, pcId: PC_ID, timestamp: Date.now() });
+								if(ltOverall) ltOverall.textContent = "RECORD  " + fmtLapTime(sessionBest) + "  (" + me.data.name + ")";
+							}
+						}
+						ltBest.textContent = "BEST  " + fmtLapTime(sessionBest);
+					} else {
+						ltBest.textContent = "BEST  --:--.---";
+					}
+				}
+
+				// ---- Build sorted data ----
 				var lbData = [];
 				var totalCPsLB = checkpointsc ? checkpointsc.children.length : 0;
 				for(var pk in players){
