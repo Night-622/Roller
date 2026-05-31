@@ -1669,7 +1669,7 @@ document.body.onkeydown = function(e){
 			}
 		});
 	}
-}
+
 function MODS(){
 
 }
