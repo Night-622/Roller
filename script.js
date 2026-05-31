@@ -985,10 +985,9 @@ function join(){
 						play.data.yv -= Math.cos(play.data.dir) * BRAKE_REVERSE * warp;
 					} else {
 						// Normal rolling friction (same whether clutching or not)
-var friction = isClutching ? CLUTCH_FRICTION : 0.99;
-
-play.data.xv *= Math.pow(friction, warp);
-play.data.yv *= Math.pow(friction, warp);
+						play.data.xv *= Math.pow(0.99, warp);
+						play.data.yv *= Math.pow(0.99, warp);
+					}
 
 					play.data.x += play.data.xv * warp;
 					play.data.y += play.data.yv * warp;
@@ -1262,12 +1261,7 @@ play.data.yv *= Math.pow(friction, warp);
 				var myKey = me.ref.path.pieces_[2];
 				var myData = me.data;
 
-				// ---- Lap timer: reset on each new lap ----
-				var myLap = Math.min(myData.lap || 1, LAPS);
-				if(window._lapStartTime && window._lastTrackedLap !== myLap){
-					window._lapStartTime = performance.now();
-					window._lastTrackedLap = myLap;
-				}
+				// ---- Lap timer: driven purely by _lapStartTime reset in physics loop ----
 				var lapElapsed = (window._lapStartTime && !window._myFinishTime)
 					? performance.now() - window._lapStartTime : 0;
 
@@ -1275,7 +1269,7 @@ play.data.yv *= Math.pow(friction, warp);
 				var ltEl = document.getElementById("lb-lap-timer");
 				if(ltEl) ltEl.textContent = window._myFinishTime ? "DONE" : fmtLapTime(lapElapsed);
 
-				// ---- Top-right lap time panel ----
+				// ---- Top-centre lap time panel ----
 				var ltCur = document.getElementById("lt-current");
 				var ltBest = document.getElementById("lt-best");
 				var ltOverall = document.getElementById("lt-overall");
