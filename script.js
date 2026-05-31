@@ -625,7 +625,7 @@ host = function(){
 								"<span id='lb-position-badge'>P1</span>" +
 							"</div>" +
 							"<div id='lb-rows'></div>";
-						lb.style.display = "block";
+						lb.style.display = "none";
 						f.appendChild(lb);
 
 						// ===== LAP TIME PANEL (top right) =====
@@ -1379,7 +1379,9 @@ function join(){
 						"</div>";
 				}
 				lbRows.innerHTML = html;
-				
+				// Also write rankings into the top-centre panel
+				var ltRank = document.getElementById("lt-rankings");
+				if(ltRank) ltRank.innerHTML = html;
 			}
 		}else{
 			camera.position.set(50 * Math.sin(x), 20, 50 * Math.cos(x));
@@ -1596,7 +1598,7 @@ codeCheck = function(){
 								"<span id='lb-position-badge'>P1</span>" +
 							"</div>" +
 							"<div id='lb-rows'></div>";
-						lb.style.display = "block";
+						lb.style.display = "none";
 						f.appendChild(lb);
 
 						// ===== LAP TIME PANEL (top right) =====
@@ -1687,6 +1689,7 @@ window.onkeyup = function(e){
 		clutch = false;
 	}
 }
+
 
 if(mobile){
 
