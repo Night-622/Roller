@@ -52,10 +52,9 @@ function setupLapTimePanel(){
 	].join(";");
 	ltPanel.innerHTML =
 		"<div id='lt-current'  style='font-size:2vmin'>LAP &nbsp;--:--.---</div>" +
-		"<div id='lt-best'     style='font-size:1.6vmin;color:#f5c518;margin-top:2px'>BEST --:--.---</div>" +
-		"<div id='lt-overall'  style='font-size:1.4vmin;color:#7df;margin-top:2px'>RECORD --:--.--- (?)</div>" +
-		"<div style='border-top:1px solid rgba(255,255,255,0.3);margin:6px 0'></div>" +
-		"<div id='lt-rankings' style='font-size:1.3vmin;text-align:left'></div>";
+		"<div id='lt-best'     style='font-size:1.6vmin;color:#f5c518'>BEST --:--.---</div>" +
+		"<div id='lt-overall'  style='font-size:1.4vmin;color:#7df'>RECORD --:--.--- (?)</div>" +
+		"<div id='lt-rankings' style='margin-top:6px;font-size:1.3vmin;text-align:left;'></div>";
 	document.getElementById("fore").appendChild(ltPanel);
 
 	// Fetch overall best lap for this map from Firebase
@@ -1671,10 +1670,11 @@ window.onkeydown = function(e){
 	if(e.keyCode == 39 || e.keyCode == 68) right = true;  // Right arrow or D
 	if(e.keyCode == 16) boostHeld = true;
 	if(e.keyCode == 32){ braking = true; e.preventDefault(); }
-	// Clutch: 1, 2, 3, 4, Z, M — stops acceleration, car keeps rolling
-	if(e.keyCode == 49 || e.keyCode == 50 || e.keyCode == 51 || e.keyCode == 52 ||
-	   e.keyCode == 90 || e.keyCode == 77){
+	// Clutch: Z, Alt, AltGr, M, 1, 2, 3, 4
+	if(e.keyCode == 90 || e.keyCode == 18 || e.keyCode == 225 || e.keyCode == 77 ||
+	   e.keyCode == 49 || e.keyCode == 50 || e.keyCode == 51 || e.keyCode == 52){
 		clutch = true;
+		e.preventDefault();
 	}
 }
 
@@ -1684,12 +1684,11 @@ window.onkeyup = function(e){
 	if(e.keyCode == 16) boostHeld = false;
 	if(e.keyCode == 32) braking = false;
 	// Release clutch
-	if(e.keyCode == 49 || e.keyCode == 50 || e.keyCode == 51 || e.keyCode == 52 ||
-	   e.keyCode == 90 || e.keyCode == 77){
+	if(e.keyCode == 90 || e.keyCode == 18 || e.keyCode == 225 || e.keyCode == 77 ||
+	   e.keyCode == 49 || e.keyCode == 50 || e.keyCode == 51 || e.keyCode == 52){
 		clutch = false;
 	}
 }
-
 
 if(mobile){
 
