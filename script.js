@@ -19,7 +19,6 @@ var BRAKE_REVERSE = 0.0009;
 
 var CLUTCH_FRICTION = 0.9999; // Decel rate while clutch held (lower = stops faster, higher = coasts longer; between BRAKE_POWER and 0.99)
 
-
 // Count number of set bits in a bitmask (used for checkpoint progress)
 function countBits(n){ var c = 0; while(n){ c += n & 1; n >>= 1; } return c; }
 
@@ -53,10 +52,9 @@ function setupLapTimePanel(){
 	].join(";");
 	ltPanel.innerHTML =
 		"<div id='lt-current'  style='font-size:2vmin'>LAP &nbsp;--:--.---</div>" +
-		"<div id='lt-best'     style='font-size:1.6vmin;color:#f5c518;margin-top:2px'>BEST --:--.---</div>" +
-		"<div id='lt-overall'  style='font-size:1.4vmin;color:#7df;margin-top:2px'>RECORD --:--.--- (?)</div>" +
-		"<div style='border-top:1px solid rgba(255,255,255,0.3);margin:6px 0'></div>" +
-		"<div id='lt-rankings' style='font-size:1.3vmin;text-align:left'></div>";
+		"<div id='lt-best'     style='font-size:1.6vmin;color:#f5c518'>BEST --:--.---</div>" +
+		"<div id='lt-overall'  style='font-size:1.4vmin;color:#7df'>RECORD --:--.--- (?)</div>" +
+		"<div id='lt-rankings' style='margin-top:6px;font-size:1.3vmin;text-align:left;'></div>";
 	document.getElementById("fore").appendChild(ltPanel);
 
 	// Fetch overall best lap for this map from Firebase
@@ -575,7 +573,7 @@ host = function(){
 					name: name,
 					checkpoint: 1,
 					cpProgress: 0,
-					lap: 1,
+					lap: 0,
 					collision: {},
 					pcId: PC_ID,
 					raceTime: 0,
@@ -987,11 +985,11 @@ function join(){
 						play.data.yv -= Math.cos(play.data.dir) * BRAKE_REVERSE * warp;
 					} else {
 						// Normal rolling friction (same whether clutching or not)
-					var friction = isClutching ? CLUTCH_FRICTION : 0.99;
+var friction = isClutching ? CLUTCH_FRICTION : 0.99;
 
-						play.data.xv *= Math.pow(friction, warp);
-						play.data.yv *= Math.pow(friction, warp);
-						
+play.data.xv *= Math.pow(friction, warp);
+play.data.yv *= Math.pow(friction, warp);
+
 					play.data.x += play.data.xv * warp;
 					play.data.y += play.data.yv * warp;
 
@@ -1264,7 +1262,12 @@ function join(){
 				var myKey = me.ref.path.pieces_[2];
 				var myData = me.data;
 
-				// ---- Lap timer: driven purely by _lapStartTime reset in physics loop ----
+				// ---- Lap timer: reset on each new lap ----
+				var myLap = Math.min(myData.lap || 1, LAPS);
+				if(window._lapStartTime && window._lastTrackedLap !== myLap){
+					window._lapStartTime = performance.now();
+					window._lastTrackedLap = myLap;
+				}
 				var lapElapsed = (window._lapStartTime && !window._myFinishTime)
 					? performance.now() - window._lapStartTime : 0;
 
@@ -1272,7 +1275,7 @@ function join(){
 				var ltEl = document.getElementById("lb-lap-timer");
 				if(ltEl) ltEl.textContent = window._myFinishTime ? "DONE" : fmtLapTime(lapElapsed);
 
-				// ---- Top-centre lap time panel ----
+				// ---- Top-right lap time panel ----
 				var ltCur = document.getElementById("lt-current");
 				var ltBest = document.getElementById("lt-best");
 				var ltOverall = document.getElementById("lt-overall");
@@ -1553,7 +1556,7 @@ codeCheck = function(){
 					name: name,
 					checkpoint: 1,
 					cpProgress: 0,
-					lap: 0,
+					lap: 1,
 					collision: {},
 					pcId: PC_ID,
 					raceTime: 0,
