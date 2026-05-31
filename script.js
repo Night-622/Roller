@@ -52,9 +52,10 @@ function setupLapTimePanel(){
 	].join(";");
 	ltPanel.innerHTML =
 		"<div id='lt-current'  style='font-size:2vmin'>LAP &nbsp;--:--.---</div>" +
-		"<div id='lt-best'     style='font-size:1.6vmin;color:#f5c518'>BEST --:--.---</div>" +
-		"<div id='lt-overall'  style='font-size:1.4vmin;color:#7df'>RECORD --:--.--- (?)</div>" +
-		"<div id='lt-rankings' style='margin-top:6px;font-size:1.3vmin;text-align:left;'></div>";
+		"<div id='lt-best'     style='font-size:1.6vmin;color:#f5c518;margin-top:2px'>BEST --:--.---</div>" +
+		"<div id='lt-overall'  style='font-size:1.4vmin;color:#7df;margin-top:2px'>RECORD --:--.--- (?)</div>" +
+		"<div style='border-top:1px solid rgba(255,255,255,0.3);margin:6px 0'></div>" +
+		"<div id='lt-rankings' style='font-size:1.3vmin;text-align:left'></div>";
 	document.getElementById("fore").appendChild(ltPanel);
 
 	// Fetch overall best lap for this map from Firebase
@@ -1697,4 +1698,4 @@ if(mobile){
 document.body.onkeydown = function(e){
 	if(e.keyCode == 73 && (e.ctrlKey || e.metaKey))
 		document.getElementById("trackcode").innerText = prompt("Track data?")
-};
+}
