@@ -39,22 +39,19 @@ function setupLapTimePanel(){
 	ltPanel.style.cssText = [
 		"position:absolute",
 		"top:10px",
-		"left:50%",
-		"transform:translateX(-50%)",
-		"text-align:center",
+		"right:10px",
+		"text-align:right",
 		"font-family:'Press Start 2P',monospace",
 		"color:#fff",
 		"text-shadow:1px 1px 4px #000,0 0 8px #000",
 		"pointer-events:none",
 		"z-index:9999",
-		"line-height:1.7",
-		"white-space:nowrap"
+		"line-height:1.7"
 	].join(";");
 	ltPanel.innerHTML =
 		"<div id='lt-current'  style='font-size:2vmin'>LAP &nbsp;--:--.---</div>" +
 		"<div id='lt-best'     style='font-size:1.6vmin;color:#f5c518'>BEST --:--.---</div>" +
-		"<div id='lt-overall'  style='font-size:1.4vmin;color:#7df'>RECORD --:--.--- (?)</div>" +
-		"<div id='lt-rankings' style='margin-top:6px;font-size:1.3vmin;text-align:left;'></div>";
+		"<div id='lt-overall'  style='font-size:1.4vmin;color:#7df'>RECORD --:--.--- (?)</div>";
 	document.getElementById("fore").appendChild(ltPanel);
 
 	// Fetch overall best lap for this map from Firebase
@@ -624,7 +621,7 @@ host = function(){
 								"<span id='lb-position-badge'>P1</span>" +
 							"</div>" +
 							"<div id='lb-rows'></div>";
-						lb.style.display = "none";
+						lb.style.display = "block";
 						f.appendChild(lb);
 
 						// ===== LAP TIME PANEL (top right) =====
@@ -972,7 +969,7 @@ function join(){
 					var isClutching = (isMe && clutch);
 					var currentSpeed = isBoosting ? SPEED + BOOST_STRENGTH : SPEED;
 
-					// Clutch: disengage engine — no acceleration, coast at normal friction
+					// Clutch: disengage engine — no acceleration, slow coast-down
 					if(!isClutching){
 						play.data.xv += Math.sin(play.data.dir) * currentSpeed * warp;
 						play.data.yv += Math.cos(play.data.dir) * currentSpeed * warp;
@@ -983,8 +980,11 @@ function join(){
 						play.data.yv *= Math.pow(BRAKE_POWER, warp);
 						play.data.xv -= Math.sin(play.data.dir) * BRAKE_REVERSE * warp;
 						play.data.yv -= Math.cos(play.data.dir) * BRAKE_REVERSE * warp;
+					} else if(isClutching){
+						// Clutch decel: slower than braking, faster than normal friction
+						play.data.xv *= Math.pow(CLUTCH_FRICTION, warp);
+						play.data.yv *= Math.pow(CLUTCH_FRICTION, warp);
 					} else {
-						// Normal rolling friction (same whether clutching or not)
 						play.data.xv *= Math.pow(0.99, warp);
 						play.data.yv *= Math.pow(0.99, warp);
 					}
@@ -1261,40 +1261,27 @@ function join(){
 				var myKey = me.ref.path.pieces_[2];
 				var myData = me.data;
 
-				// ---- Lap timer: driven purely by _lapStartTime reset in physics loop ----
-				var lapElapsed = (window._lapStartTime && !window._myFinishTime)
-					? performance.now() - window._lapStartTime : 0;
-
-				// Update leaderboard lap timer
-				var ltEl = document.getElementById("lb-lap-timer");
-				if(ltEl) ltEl.textContent = window._myFinishTime ? "DONE" : fmtLapTime(lapElapsed);
-
-				// ---- Top-centre lap time panel ----
-				var ltCur = document.getElementById("lt-current");
-				var ltBest = document.getElementById("lt-best");
-				var ltOverall = document.getElementById("lt-overall");
-				if(ltCur) ltCur.textContent = window._myFinishTime ? "DONE" : ("LAP  " + fmtLapTime(lapElapsed));
-				if(ltBest){
-					var splits = window._myLapSplits || [];
-					if(splits.length > 0){
-						var sessionBest = Math.min.apply(null, splits);
-						if(!window._sessionBestLap || sessionBest < window._sessionBestLap){
-							window._sessionBestLap = sessionBest;
-							if(!window._overallBestLap || sessionBest < window._overallBestLap){
-								window._overallBestLap = sessionBest;
-								window._overallBestName = me.data.name;
-								var mapKey = (document.title || "track").replace(/[^a-zA-Z0-9_]/g,"_");
-								database.ref("bestlaps/" + mapKey).set({ lapTime: sessionBest, name: me.data.name, pcId: PC_ID, timestamp: Date.now() });
-								if(ltOverall) ltOverall.textContent = "RECORD  " + fmtLapTime(sessionBest) + "  (" + me.data.name + ")";
-							}
-						}
-						ltBest.textContent = "BEST  " + fmtLapTime(sessionBest);
-					} else {
-						ltBest.textContent = "BEST  --:--.---";
-					}
+				// ---- Lap timer: reset on each new lap ----
+				var myLap = Math.min(myData.lap || 1, LAPS);
+				if(window._lapStartTime && window._lastTrackedLap !== myLap){
+					window._lapStartTime = performance.now();
+					window._lastTrackedLap = myLap;
 				}
-
-				// ---- Build sorted data ----
+				var lapElapsed = (window._lapStartTime && !window._myFinishTime)
+					? performance.now() - window._lapStartTime
+					: (window._myFinishTime ? 0 : 0);
+				var ltEl = document.getElementById("lb-lap-timer");
+				if(ltEl && !window._myFinishTime){
+					var lm = Math.floor(lapElapsed / 60000);
+					var ls = Math.floor((lapElapsed % 60000) / 1000);
+					var lms = Math.floor(lapElapsed % 1000);
+					ltEl.textContent =
+						String(lm).padStart(2,"0") + ":" +
+						String(ls).padStart(2,"0") + "." +
+						String(lms).padStart(3,"0");
+				} else if(ltEl && window._myFinishTime){
+					ltEl.textContent = "DONE";
+				}				// ---- Build sorted data ----
 				var lbData = [];
 				var totalCPsLB = checkpointsc ? checkpointsc.children.length : 0;
 				for(var pk in players){
@@ -1378,9 +1365,6 @@ function join(){
 						"</div>";
 				}
 				lbRows.innerHTML = html;
-				// Also write rankings into the top-centre panel
-				var ltRank = document.getElementById("lt-rankings");
-				if(ltRank) ltRank.innerHTML = html;
 			}
 		}else{
 			camera.position.set(50 * Math.sin(x), 20, 50 * Math.cos(x));
@@ -1597,7 +1581,7 @@ codeCheck = function(){
 								"<span id='lb-position-badge'>P1</span>" +
 							"</div>" +
 							"<div id='lb-rows'></div>";
-						lb.style.display = "none";
+						lb.style.display = "block";
 						f.appendChild(lb);
 
 						// ===== LAP TIME PANEL (top right) =====
@@ -1670,8 +1654,8 @@ window.onkeydown = function(e){
 	if(e.keyCode == 39 || e.keyCode == 68) right = true;  // Right arrow or D
 	if(e.keyCode == 16) boostHeld = true;
 	if(e.keyCode == 32){ braking = true; e.preventDefault(); }
-	// Clutch: Z, Alt, AltGr, M, 1, 2, 3, 4
-	if(e.keyCode == 90 || e.keyCode == 18 || e.keyCode == 225 || e.keyCode == 77 ||
+	// Clutch: Alt keys (18 = Alt, 225 = AltGr) or number keys 1-4
+	if(e.keyCode == 18 || e.keyCode == 225 ||
 	   e.keyCode == 49 || e.keyCode == 50 || e.keyCode == 51 || e.keyCode == 52){
 		clutch = true;
 		e.preventDefault();
@@ -1683,8 +1667,8 @@ window.onkeyup = function(e){
 	if(e.keyCode == 39 || e.keyCode == 68) right = false;  // Right arrow or D
 	if(e.keyCode == 16) boostHeld = false;
 	if(e.keyCode == 32) braking = false;
-	// Release clutch
-	if(e.keyCode == 90 || e.keyCode == 18 || e.keyCode == 225 || e.keyCode == 77 ||
+	// Release clutch when all clutch keys are up
+	if(e.keyCode == 18 || e.keyCode == 225 ||
 	   e.keyCode == 49 || e.keyCode == 50 || e.keyCode == 51 || e.keyCode == 52){
 		clutch = false;
 	}
