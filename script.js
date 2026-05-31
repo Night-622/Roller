@@ -573,7 +573,7 @@ host = function(){
 					name: name,
 					checkpoint: 1,
 					cpProgress: 0,
-					lap: 0,
+					lap: 1,
 					collision: {},
 					pcId: PC_ID,
 					raceTime: 0,
@@ -1253,7 +1253,7 @@ function join(){
 
 			me.ref.set(me.data);
 
-			lap.innerHTML = me.data.lap <= LAPS ? (me.data.lap + 1) + "/" + LAPS : "";
+			lap.innerHTML = me.data.lap <= LAPS ? me.data.lap + "/" + LAPS : "";
 
 			// ===== UPDATE LEADERBOARD =====
 			var lbRows = document.getElementById("lb-rows");
@@ -1363,7 +1363,7 @@ function join(){
 				for(var i = 0; i < lbData.length; i++){
 					var d = lbData[i];
 					var isMe = d.key === myKey;
-					var lapCol = "L" + Math.min(d.lap + 1, LAPS) + "/" + LAPS;
+					var lapCol = "L" + Math.min(d.lap, LAPS) + "/" + LAPS;
 					if(totalCPsLB > 0 && !d.finished)
 						lapCol += " CP" + d.cpHit + "/" + totalCPsLB;
 					var timeStr = "";
@@ -1555,7 +1555,7 @@ codeCheck = function(){
 					name: name,
 					checkpoint: 1,
 					cpProgress: 0,
-					lap: 0,
+					lap: 1,
 					collision: {},
 					pcId: PC_ID,
 					raceTime: 0,
