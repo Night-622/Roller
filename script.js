@@ -17,7 +17,7 @@ var BOOST_DRAIN_TIME = 4000;
 var BRAKE_POWER = 0.97;
 var BRAKE_REVERSE = 0.0009;
 
-var CLUTCH_FRICTION = 0.665; // Decel rate while clutch held (lower = stops faster, higher = coasts longer; between BRAKE_POWER and 0.99)
+var CLUTCH_FRICTION = 0.865; // Decel rate while clutch held (lower = stops faster, higher = coasts longer; between BRAKE_POWER and 0.99)
 
 // Count number of set bits in a bitmask (used for checkpoint progress)
 function countBits(n){ var c = 0; while(n){ c += n & 1; n >>= 1; } return c; }
@@ -634,7 +634,7 @@ host = function(){
 						window._raceStartTime = null;
 						window._myFinishTime = null;
 						window._lapStartTime = null;
-						window._lastTrackedLap = 0;
+						window._lastTrackedLap = 1;
 
 						setTimeout(function(){ countDown.innerHTML = "2"; }, 1000);
 						setTimeout(function(){ countDown.innerHTML = "1"; }, 2000);
@@ -846,7 +846,7 @@ function loadMap(){
 	} catch(e) {
 		console.warn("Checkpoint parse error:", e);
 	}
-	// Add to scene — visible checkpoint lines
+	// Add to scene â€” visible checkpoint lines
 	scene.add(checkpointsc);
 
 	// Eval code: segment 5 for new format (with checkpoints), segment 4 for old format
@@ -973,7 +973,7 @@ function join(){
 					var isClutching = (isMe && clutch);
 					var currentSpeed = isBoosting ? SPEED + BOOST_STRENGTH : SPEED;
 
-					// Clutch: disengage engine — no acceleration, coast at normal friction
+					// Clutch: disengage engine â€” no acceleration, coast at normal friction
 					if(!isClutching){
 						play.data.xv += Math.sin(play.data.dir) * currentSpeed * warp;
 						play.data.yv += Math.cos(play.data.dir) * currentSpeed * warp;
@@ -1074,7 +1074,7 @@ function join(){
 					if(play == players[me.ref.path.pieces_[2]]){
 						var totalCPs = checkpointsc ? checkpointsc.children.length : 0;
 
-						// Sequential checkpoint system — only the NEXT expected checkpoint triggers
+						// Sequential checkpoint system â€” only the NEXT expected checkpoint triggers
 						// window._cpNext = index of next checkpoint to hit (0-based)
 						if(typeof window._cpNext === "undefined") window._cpNext = 0;
 
@@ -1159,7 +1159,7 @@ function join(){
 
 							// /games/<dateKey>/<gameCode>/results/<playerKey>
 							database.ref("games/" + dateKey + "/" + code + "/results/" + me.ref.path.pieces_[2]).set(resultData);
-							// /games/<dateKey>/<gameCode>/meta — written once by first finisher
+							// /games/<dateKey>/<gameCode>/meta â€” written once by first finisher
 							database.ref("games/" + dateKey + "/" + code + "/meta").once("value", function(ms){
 								if(!ms.val()){
 									database.ref("games/" + dateKey + "/" + code + "/meta").set({
@@ -1191,7 +1191,8 @@ function join(){
 						play.data.raceTime = performance.now() - window._raceStartTime;
 
 						// Lap timer - reset when lap increases, record split
-						if(typeof window._lastTrackedLap === "undefined") window._lastTrackedLap = 0;
+						// Initialize to 1 (starting lap) so we don't record a bogus near-zero split on the first frame
+						if(typeof window._lastTrackedLap === "undefined") window._lastTrackedLap = 1;
 						if(!window._myLapSplits) window._myLapSplits = [];
 						if(!window._finishPositions) window._finishPositions = [];
 						if(play.data.lap > window._lastTrackedLap && window._lapStartTime){
@@ -1263,18 +1264,23 @@ function join(){
 				var myData = me.data;
 
 				// ---- Lap timer: driven purely by _lapStartTime reset in physics loop ----
-				var lapElapsed = (window._lapStartTime && !window._myFinishTime)
-					? performance.now() - window._lapStartTime : 0;
+				// Once finished, freeze the display at the total race time
+				var lapElapsed;
+				if(window._myFinishTime){
+					lapElapsed = window._myFinishTime;
+				} else {
+					lapElapsed = (window._lapStartTime) ? performance.now() - window._lapStartTime : 0;
+				}
 
-				// Update leaderboard lap timer
+				// Update leaderboard lap timer — freeze at finish time, don't keep counting
 				var ltEl = document.getElementById("lb-lap-timer");
-				if(ltEl) ltEl.textContent = window._myFinishTime ? "DONE" : fmtLapTime(lapElapsed);
+				if(ltEl) ltEl.textContent = window._myFinishTime ? fmtLapTime(window._myFinishTime) : fmtLapTime(lapElapsed);
 
 				// ---- Top-centre lap time panel ----
 				var ltCur = document.getElementById("lt-current");
 				var ltBest = document.getElementById("lt-best");
 				var ltOverall = document.getElementById("lt-overall");
-				if(ltCur) ltCur.textContent = window._myFinishTime ? "DONE" : ("LAP  " + fmtLapTime(lapElapsed));
+				if(ltCur) ltCur.textContent = window._myFinishTime ? ("DONE  " + fmtLapTime(window._myFinishTime)) : ("LAP  " + fmtLapTime(lapElapsed));
 				if(ltBest){
 					var splits = window._myLapSplits || [];
 					if(splits.length > 0){
@@ -1365,7 +1371,7 @@ function join(){
 					var timeStr = "";
 					if(d.finished){
 						timeStr = "<span class='lb-finished'>" + fmtTime(d.raceTime) + "</span>";
-						lapCol = "✓";
+						lapCol = "âœ“";
 					} else {
 						timeStr = fmtTime(d.raceTime);
 					}
@@ -1606,7 +1612,7 @@ codeCheck = function(){
 						window._raceStartTime = null;
 						window._myFinishTime = null;
 						window._lapStartTime = null;
-						window._lastTrackedLap = 0;
+						window._lastTrackedLap = 1;
 
 						setTimeout(function(){ countDown.innerHTML = "2"; }, 1000);
 						setTimeout(function(){ countDown.innerHTML = "1"; }, 2000);
@@ -1669,7 +1675,7 @@ window.onkeydown = function(e){
 	if(e.keyCode == 39 || e.keyCode == 68) right = true;  // Right arrow or D
 	if(e.keyCode == 16) boostHeld = true;
 	if(e.keyCode == 32){ braking = true; e.preventDefault(); }
-	// Clutch: 1, 2, 3, 4, Z, M — stops acceleration, car keeps rolling
+	// Clutch: 1, 2, 3, 4, Z, M â€” stops acceleration, car keeps rolling
 	if(e.keyCode == 49 || e.keyCode == 50 || e.keyCode == 51 || e.keyCode == 52 ||
 	   e.keyCode == 90 || e.keyCode == 77){
 		clutch = true;
