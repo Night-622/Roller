@@ -1115,6 +1115,13 @@ function join(){
 						document.getElementById("countdown").innerHTML = play.data.name.replaceAll("<", "&lt;") + " Won!";
 
 						// ===== RECORD FINISH =====
+						if(window._lapStartTime){
+    var finalSplit = performance.now() - window._lapStartTime;
+    if(finalSplit > 3000){
+        if(!window._myLapSplits) window._myLapSplits = [];
+        window._myLapSplits.push(Math.round(finalSplit));
+    }
+}
 						if(play == players[me.ref.path.pieces_[2]] && !window._myFinishTime){
 							window._myFinishTime = window._raceStartTime ? (performance.now() - window._raceStartTime) : 0;
 							play.data.raceTime = window._myFinishTime;
