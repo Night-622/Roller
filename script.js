@@ -634,7 +634,7 @@ host = function(){
 						window._raceStartTime = null;
 						window._myFinishTime = null;
 						window._lapStartTime = null;
-						window._lastTrackedLap = 0;
+						window._lastTrackedLap = 1;
 
 						setTimeout(function(){ countDown.innerHTML = "2"; }, 1000);
 						setTimeout(function(){ countDown.innerHTML = "1"; }, 2000);
@@ -1191,7 +1191,7 @@ function join(){
 						play.data.raceTime = performance.now() - window._raceStartTime;
 
 						// Lap timer - reset when lap increases, record split
-						if(typeof window._lastTrackedLap === "undefined") window._lastTrackedLap = 0;
+						if(typeof window._lastTrackedLap === "undefined") window._lastTrackedLap = 1;
 						if(!window._myLapSplits) window._myLapSplits = [];
 						if(!window._finishPositions) window._finishPositions = [];
 						if(play.data.lap > window._lastTrackedLap && window._lapStartTime){
