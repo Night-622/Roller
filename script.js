@@ -635,6 +635,8 @@ host = function(){
 						window._myFinishTime = null;
 						window._lapStartTime = null;
 						window._lastTrackedLap = 1;
+						window._finishedLapElapsed = null;
+						window._myLapSplits = [];
 
 						setTimeout(function(){ countDown.innerHTML = "2"; }, 1000);
 						setTimeout(function(){ countDown.innerHTML = "1"; }, 2000);
@@ -1120,12 +1122,22 @@ function join(){
 							play.data.raceTime = window._myFinishTime;
 							play.data.finished = true;
 
+							// Record the final lap split (the last lap never gets recorded in the tracking block below
+							// because that block is guarded by !window._myFinishTime which is now set)
+							if(window._lapStartTime){
+								var lastLapTime = performance.now() - window._lapStartTime;
+								if(!window._myLapSplits) window._myLapSplits = [];
+								window._myLapSplits.push(Math.round(lastLapTime));
+							}
+							// Freeze the lap stopwatch display at the moment of crossing the line
+							window._finishedLapElapsed = window._lapStartTime ? (performance.now() - window._lapStartTime) : 0;
+
 							// Work out finishing position from other players already done
 							if(!window._finishPositions) window._finishPositions = [];
 							window._finishPositions.push(me.ref.path.pieces_[2]);
 							var myPlace = window._finishPositions.length;
 
-							// Fastest lap from recorded lap splits
+							// Fastest lap from recorded lap splits (now includes the last lap)
 							var lapSplits = window._myLapSplits || [];
 							var fastestLap = lapSplits.length ? Math.min.apply(null, lapSplits) : window._myFinishTime;
 
@@ -1264,17 +1276,17 @@ function join(){
 				var myData = me.data;
 
 				// ---- Lap timer: driven purely by _lapStartTime reset in physics loop ----
-				// Once finished, freeze the display at the total race time
+				// Once finished, freeze the display at the moment the finish line was crossed
 				var lapElapsed;
 				if(window._myFinishTime){
-					lapElapsed = window._myFinishTime;
+					lapElapsed = window._finishedLapElapsed || 0;
 				} else {
 					lapElapsed = (window._lapStartTime) ? performance.now() - window._lapStartTime : 0;
 				}
 
 				// Update leaderboard lap timer — freeze at finish time, don't keep counting
 				var ltEl = document.getElementById("lb-lap-timer");
-				if(ltEl) ltEl.textContent = window._myFinishTime ? fmtLapTime(window._myFinishTime) : fmtLapTime(lapElapsed);
+				if(ltEl) ltEl.textContent = fmtLapTime(lapElapsed);
 
 				// ---- Top-centre lap time panel ----
 				var ltCur = document.getElementById("lt-current");
@@ -1613,6 +1625,8 @@ codeCheck = function(){
 						window._myFinishTime = null;
 						window._lapStartTime = null;
 						window._lastTrackedLap = 1;
+						window._finishedLapElapsed = null;
+						window._myLapSplits = [];
 
 						setTimeout(function(){ countDown.innerHTML = "2"; }, 1000);
 						setTimeout(function(){ countDown.innerHTML = "1"; }, 2000);
