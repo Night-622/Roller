@@ -1254,8 +1254,8 @@ function join(){
 
 			me.ref.set(me.data);
 
-			lap.innerHTML = me.data.lap <= LAPS ? (me.data.lap + 1) + "/" + LAPS : "";
-
+			lap.innerHTML = me.data.lap <= LAPS ? me.data.lap + "/" + LAPS : "";
+			
 			// ===== UPDATE LEADERBOARD =====
 			var lbRows = document.getElementById("lb-rows");
 			if(lbRows){
