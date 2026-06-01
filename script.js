@@ -574,7 +574,7 @@ host = function(){
 					name: name,
 					checkpoint: 1,
 					cpProgress: 0,
-					lap: 0,
+					lap: 1,
 					collision: {},
 					pcId: PC_ID,
 					raceTime: 0,
