@@ -1115,13 +1115,6 @@ function join(){
 						document.getElementById("countdown").innerHTML = play.data.name.replaceAll("<", "&lt;") + " Won!";
 
 						// ===== RECORD FINISH =====
-						if(window._lapStartTime){
-    var finalSplit = performance.now() - window._lapStartTime;
-    if(finalSplit > 3000){
-        if(!window._myLapSplits) window._myLapSplits = [];
-        window._myLapSplits.push(Math.round(finalSplit));
-    }
-}
 						if(play == players[me.ref.path.pieces_[2]] && !window._myFinishTime){
 							window._myFinishTime = window._raceStartTime ? (performance.now() - window._raceStartTime) : 0;
 							play.data.raceTime = window._myFinishTime;
@@ -1194,7 +1187,7 @@ function join(){
 					}
 
 					// Track race time for my player
-					if(play == players[me.ref.path.pieces_[2]] && window._raceStartTime){
+					if(play == players[me.ref.path.pieces_[2]] && window._raceStartTime && !window._myFinishTime){
 						play.data.raceTime = performance.now() - window._raceStartTime;
 
 						// Lap timer - reset when lap increases, record split
@@ -1202,13 +1195,11 @@ function join(){
 						if(!window._myLapSplits) window._myLapSplits = [];
 						if(!window._finishPositions) window._finishPositions = [];
 						if(play.data.lap > window._lastTrackedLap && window._lapStartTime){
-  						  var splitTime = performance.now() - window._lapStartTime;
-					    if(splitTime > 3000){
- 				       window._myLapSplits.push(Math.round(splitTime));
- 				       window._lastTrackedLap = play.data.lap;
-				       window._lapStartTime = performance.now();
-			    }
-		}
+							var splitTime = performance.now() - window._lapStartTime;
+							window._myLapSplits.push(Math.round(splitTime));
+							window._lastTrackedLap = play.data.lap;
+							window._lapStartTime = performance.now();
+						}
 					}
 
 					for(var pl in players){
@@ -1285,9 +1276,8 @@ function join(){
 				var ltOverall = document.getElementById("lt-overall");
 				if(ltCur) ltCur.textContent = window._myFinishTime ? "DONE" : ("LAP  " + fmtLapTime(lapElapsed));
 				if(ltBest){
-    var splits = window._myLapSplits || [];
-    if(splits.length > 0){
-        var sessionBest = Math.min.apply(null, splits);
+					var splits = window._myLapSplits || [];
+					if(splits.length > 0){
 						var sessionBest = Math.min.apply(null, splits);
 						if(!window._sessionBestLap || sessionBest < window._sessionBestLap){
 							window._sessionBestLap = sessionBest;
