@@ -10,14 +10,14 @@ var MOUNTAIN_DIST = 450;
 var OOB_DIST = 500;
 var LAPS = 3;
 
-var BOOST_STRENGTH = 0.0093; 
+var BOOST_STRENGTH = 0.01; 
 var BOOST_RECHARGE_TIME = 8250; 
 var BOOST_DRAIN_TIME = 4000;
 
 var BRAKE_POWER = 0.97;
 var BRAKE_REVERSE = 0.0009;
 
-var CLUTCH_FRICTION = 1.475; // Decel rate while clutch held (lower = stops faster, higher = coasts longer; between BRAKE_POWER and 0.99)
+var CLUTCH_FRICTION = 0.675; // Decel rate while clutch held (lower = stops faster, higher = coasts longer; between BRAKE_POWER and 0.99)
 
 // Count number of set bits in a bitmask (used for checkpoint progress)
 function countBits(n){ var c = 0; while(n){ c += n & 1; n >>= 1; } return c; }
