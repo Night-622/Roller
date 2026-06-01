@@ -1194,7 +1194,7 @@ function join(){
 					}
 
 					// Track race time for my player
-					if(play == players[me.ref.path.pieces_[2]] && window._raceStartTime && !window._myFinishTime){
+					if(play == players[me.ref.path.pieces_[2]] && window._raceStartTime){
 						play.data.raceTime = performance.now() - window._raceStartTime;
 
 						// Lap timer - reset when lap increases, record split
@@ -1285,8 +1285,9 @@ function join(){
 				var ltOverall = document.getElementById("lt-overall");
 				if(ltCur) ltCur.textContent = window._myFinishTime ? "DONE" : ("LAP  " + fmtLapTime(lapElapsed));
 				if(ltBest){
-					var splits = window._myLapSplits || [];
-					if(splits.length > 0){
+    var splits = window._myLapSplits || [];
+    if(splits.length > 0){
+        var sessionBest = Math.min.apply(null, splits);
 						var sessionBest = Math.min.apply(null, splits);
 						if(!window._sessionBestLap || sessionBest < window._sessionBestLap){
 							window._sessionBestLap = sessionBest;
