@@ -1195,11 +1195,13 @@ function join(){
 						if(!window._myLapSplits) window._myLapSplits = [];
 						if(!window._finishPositions) window._finishPositions = [];
 						if(play.data.lap > window._lastTrackedLap && window._lapStartTime){
-							var splitTime = performance.now() - window._lapStartTime;
-							window._myLapSplits.push(Math.round(splitTime));
-							window._lastTrackedLap = play.data.lap;
-							window._lapStartTime = performance.now();
-						}
+  						  var splitTime = performance.now() - window._lapStartTime;
+					    if(splitTime > 3000){
+ 				       window._myLapSplits.push(Math.round(splitTime));
+ 				       window._lastTrackedLap = play.data.lap;
+				       window._lapStartTime = performance.now();
+			    }
+		}
 					}
 
 					for(var pl in players){
