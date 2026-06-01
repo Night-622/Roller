@@ -17,7 +17,10 @@ var BOOST_DRAIN_TIME = 4000;
 var BRAKE_POWER = 0.97;
 var BRAKE_REVERSE = 0.0009;
 
-var CLUTCH_FRICTION = 0.665; // Decel rate while clutch held (lower = stops faster, higher = coasts longer; between BRAKE_POWER and 0.99)
+var CLUTCH_FRICTION = 0.665;
+
+// Minimum lap time in ms — anything faster is a timing glitch, not a real lap
+var MIN_VALID_LAP_MS = 5000;
 
 // Count number of set bits in a bitmask (used for checkpoint progress)
 function countBits(n){ var c = 0; while(n){ c += n & 1; n >>= 1; } return c; }
@@ -30,7 +33,6 @@ function fmtLapTime(ms){
 }
 
 function setupLapTimePanel(){
-	// Remove any existing panel
 	var old = document.getElementById("laptime-panel");
 	if(old) old.parentNode.removeChild(old);
 
@@ -81,13 +83,10 @@ function MODS(){
 }
 
 // ===== UNIQUE PC ID =====
-// Each browser gets a persistent unique ID stored in localStorage.
-// This lets the DB track distinct machines across sessions.
 var PC_ID = (function(){
 	var key = "roller_pc_id";
 	var id = localStorage.getItem(key);
 	if(!id){
-		// Generate a random 16-char hex ID
 		id = "";
 		for(var i = 0; i < 16; i++)
 			id += Math.floor(Math.random()*16).toString(16);
@@ -214,17 +213,6 @@ for(var i = 0; i < serverList.length; i++){
 	});
 }
 
-/*var config = {
-	apiKey: "AIzaSyDiJsMLlix5o9XqPW1EpeBvuA15XNjlR8M",
-	authDomain: "car-game-a86b9.firebaseapp.com",
-	databaseURL: "https://car-game-a86b9.firebaseio.com",
-	projectId: "car-game-a86b9",
-	storageBucket: "car-game-a86b9.appspot.com",
-	messagingSenderId: "722396856191",
-	appId: "1:722396856191:web:fb5f72917856108a50e44a"
-}*/
-
-
 setTimeout(function(){
 	document.getElementById("title").style.transform = "none";
 }, 500);
@@ -243,98 +231,6 @@ setTimeout(function(){
 setTimeout(function(){
 	document.getElementById("settings").style.transform = "none";
 }, 1800);
-/*var connected = -1;
-/*var config = {
-	apiKey: "AIzaSyDiJsMLlix5o9XqPW1EpeBvuA15XNjlR8M",
-	authDomain: "car-game-a86b9.firebaseapp.com",
-	databaseURL: "https://car-game-a86b9.firebaseio.com",
-	projectId: "car-game-a86b9",
-	storageBucket: "car-game-a86b9.appspot.com",
-	messagingSenderId: "722396856191"
-};
-firebase.initializeApp(config);
-var database = firebase.database();
-try{
-	firebase.analytics();
-}catch(e){ console.log("Analytics were blocked :("); }
-
-
-database.ref("/testServer").once("value", function(e){
-	if(connected < 0 || connected > 0){
-		database = firebase.apps[0].database();
-		connected = 0;
-	}
-});
-
-config = {
-	apiKey: "AIzaSyCsqpn0aTDqU8ffGVE284fmSEOTK2tOgq8",
-	authDomain: "car-game-backup.firebaseapp.com",
-	databaseURL: "https://car-game-backup.firebaseio.com",
-	projectId: "car-game-backup",
-	storageBucket: "car-game-backup.appspot.com",
-	messagingSenderId: "1015722732476"
-};
-firebase.initializeApp(config, "backup");
-database = firebase.apps[1].database();
-database.ref("/testServer").once("value", function(e){
-	if(connected < 0 || connected > 1){
-		database = firebase.apps[1].database();
-		connected = 1;
-	}
-});
-
-config = {
-	apiKey: "AIzaSyDNuMPH_bg8Orkndl8Md6lUh_EOS3pitGs",
-	authDomain: "car-game-backup-2.firebaseapp.com",
-	databaseURL: "https://car-game-backup-2-default-rtdb.firebaseio.com",
-	projectId: "car-game-backup-2",
-	storageBucket: "car-game-backup-2.appspot.com",
-	messagingSenderId: "250860288006",
-	appId: "1:250860288006:web:9df8ed3929e7fceb2d2b87"
-};
-firebase.initializeApp(config, "backup2");
-database = firebase.apps[2].database();
-database.ref("/testServer").once("value", function(e){
-	if(connected < 0 || connected > 2){
-		database = firebase.apps[2].database();
-		connected = 2;
-	}
-});
-
-config = {
-	apiKey: "AIzaSyCmfz7RvzLaAo4xIxA-sH3qhXuGQZYMuvE",
-	authDomain: "car-game-backup-3.firebaseapp.com",
-	databaseURL: "https://car-game-backup-3-default-rtdb.firebaseio.com",
-	projectId: "car-game-backup-3",
-	storageBucket: "car-game-backup-3.appspot.com",
-	messagingSenderId: "477326457153",
-	appId: "1:477326457153:web:421821136bcc6a67f149c0"
-};
-firebase.initializeApp(config, "backup3");
-database = firebase.apps[3].database();
-database.ref("/testServer").once("value", function(e){
-	if(connected < 0 || connected > 3){
-		database = firebase.apps[3].database();
-		connected = 3;
-	}
-});
-
-config = {
-	apiKey: "AIzaSyAerrEq1YUJNZnvQhZvyRa6LOS9VyhEYvs",
-	authDomain: "car-game-backup-4.firebaseapp.com",
-	projectId: "car-game-backup-4",
-	storageBucket: "car-game-backup-4.appspot.com",
-	messagingSenderId: "802151922986",
-	appId: "1:802151922986:web:69b9ff0ad8778d51da7253"
-};
-firebase.initializeApp(config, "backup4");
-database = firebase.apps[4].database();
-database.ref("/testServer").once("value", function(e){
-	if(connected < 0 || connected > 4){
-		database = firebase.apps[4].database();
-		connected = 4;
-	}
-}); */
 
 if(top != self) {
 	document.getElementById("warning").style.display = "block";
@@ -345,8 +241,6 @@ function forceScroll(){
 	window.scrollTo(0, 0);
 }
 forceScroll();
-
-//var database = firebase.database();
 
 var camera, renderer, scene, renderer2, scene2, labels = [];
 scene = new THREE.Scene();
@@ -381,7 +275,7 @@ function toggleFullScreen() {
 }
 
 var name, code, players = {}, me = {}, gameStarted = false, gameSortaStarted = false, left = false, right = false, braking = false, boostHeld = false, boostTank = 100, lap;
-var clutch = false; // Clutch pedal: disengages engine (no accel) and slowly decelerates
+var clutch = false;
 var carPos = [
 	{x: 0, y: 0},
 	{x: 2, y: 0},
@@ -473,7 +367,7 @@ host = function(){
 			code += letters[Math.floor(Math.random() * letters.length)];
 		database.ref(code).once("value", function(codeCheck){
 			console.log(codeCheck.val());
-			if(codeCheck.val() == null || codeCheck.val().status == -1 || !codeCheck.val().timestamp || Date.now() - codeCheck.val().timestamp > 1000 * 60 * 60 * 24){ // Allow overwriting a game if it was created more than 24 hours ago - seems safe.
+			if(codeCheck.val() == null || codeCheck.val().status == -1 || !codeCheck.val().timestamp || Date.now() - codeCheck.val().timestamp > 1000 * 60 * 60 * 24){
 				console.log(code);
 				document.getElementById("code").innerHTML = code;
 
@@ -513,7 +407,6 @@ host = function(){
 						data: p.val(),
 						model: new THREE.Mesh(new THREE.BoxBufferGeometry(1, 1, 2))
 					};
-					// Track for startGame player count
 					if(!window._lobbyPlayers) window._lobbyPlayers = {};
 					window._lobbyPlayers[p.ref_.path.pieces_[2]] = true;
 					var pl = players[p.ref_.path.pieces_[2]];
@@ -558,7 +451,6 @@ host = function(){
 				});
 
 				database.ref(code + "/players").on("child_changed", function(p){
-					// console.log(p);
 					players[p.ref_.path.pieces_[2]].data = p.val();
 				});
 
@@ -587,7 +479,6 @@ host = function(){
 					if(v == 1){
 						document.getElementsByClassName("info")[0].outerHTML = "";
 						document.getElementById("startgame").outerHTML = "";
-						// Remove live settings panel
 						var lsp = document.getElementById("livesettings");
 						if(lsp) lsp.outerHTML = "";
 
@@ -628,13 +519,15 @@ host = function(){
 						lb.style.display = "block";
 						f.appendChild(lb);
 
-						// ===== LAP TIME PANEL (top right) =====
+						// ===== LAP TIME PANEL =====
 						setupLapTimePanel();
 
+						// Reset all timing state
 						window._raceStartTime = null;
 						window._myFinishTime = null;
 						window._lapStartTime = null;
-						window._lastTrackedLap = 1;
+						window._lastTrackedLap = 1;  // FIX: was missing/inconsistent; always start at 1
+						window._myLapSplits = [];    // FIX: always reset cleanly on new game
 
 						setTimeout(function(){ countDown.innerHTML = "2"; }, 1000);
 						setTimeout(function(){ countDown.innerHTML = "1"; }, 2000);
@@ -642,18 +535,18 @@ host = function(){
 							countDown.innerHTML = "GO!";
 							gameSortaStarted = false;
 							window._raceStartTime = performance.now();
-							window._lapStartTime = performance.now();
+							window._lapStartTime = performance.now(); // FIX: lap timer starts at GO, not before
 						}, 3000);
 						setTimeout(function(){ countDown.innerHTML = ""; }, 4000);
-					}  // end if(v == 1)
-				}); // end status.on
+					}
+				});
 			}else
 				getCode();
-		}); // end codeCheck.once
-	}  // end getCode
+		});
+	}
 
 	join();
-}  // end host
+}
 
 joinGame = function(){
 	document.getElementById("join").onclick = null;
@@ -696,7 +589,6 @@ function deleteMap(){
 function loadMap(){
 	var racedata = document.getElementById("trackcode").innerHTML.trim().split("|")[0].trim().split(" ");
 	var material = new THREE.MeshLambertMaterial({color: new THREE.Color(0xf48342)});
-	//var mapscale = 7;
 	map = new THREE.Object3D();
 	for(var i = 0; i < racedata.length; i++){
 		if(racedata[i] == "")
@@ -810,7 +702,7 @@ function loadMap(){
 	}
 	scene.add(main);
 
-	// ===== CHECKPOINTS (segment 4) =====
+	// ===== CHECKPOINTS =====
 	checkpointsc = new THREE.Object3D();
 	try {
 		var cpRawData = document.getElementById("trackcode").innerHTML.trim().split("|");
@@ -846,10 +738,8 @@ function loadMap(){
 	} catch(e) {
 		console.warn("Checkpoint parse error:", e);
 	}
-	// Add to scene — visible checkpoint lines
 	scene.add(checkpointsc);
 
-	// Eval code: segment 5 for new format (with checkpoints), segment 4 for old format
 	var segments = document.getElementById("trackcode").innerText.trim().split("|");
 	var evalCode = segments.length >= 6 ? segments[5] : segments[4];
 	return evalCode || "";
@@ -897,8 +787,6 @@ function join(){
 	light.shadow.bias = 0.00002;
 	scene.add(light);
 	scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-
-	//scene.add(new THREE.AmbientLight(0x404040));
 
 	var x = 0;
 	var ray = new THREE.Raycaster();
@@ -963,7 +851,6 @@ function join(){
 							boostTank += (100 / BOOST_RECHARGE_TIME) * timepassed;
 							if(boostTank > 100) boostTank = 100;
 						}
-						// Update boost bar UI
 						var bar = document.getElementById("boostbar");
 						if(bar) bar.style.width = boostTank + "%";
 					}
@@ -973,7 +860,6 @@ function join(){
 					var isClutching = (isMe && clutch);
 					var currentSpeed = isBoosting ? SPEED + BOOST_STRENGTH : SPEED;
 
-					// Clutch: disengage engine — no acceleration, coast at normal friction
 					if(!isClutching){
 						play.data.xv += Math.sin(play.data.dir) * currentSpeed * warp;
 						play.data.yv += Math.cos(play.data.dir) * currentSpeed * warp;
@@ -985,7 +871,6 @@ function join(){
 						play.data.xv -= Math.sin(play.data.dir) * BRAKE_REVERSE * warp;
 						play.data.yv -= Math.cos(play.data.dir) * BRAKE_REVERSE * warp;
 					} else {
-						// Normal rolling friction (same whether clutching or not)
 						play.data.xv *= Math.pow(0.99, warp);
 						play.data.yv *= Math.pow(0.99, warp);
 					}
@@ -1000,24 +885,6 @@ function join(){
 					play.model.children[0].rotation.z = Math.PI / 2 - play.data.steer;
 					play.model.children[1].rotation.z = Math.PI / 2 - play.data.steer;
 
-					// function checkCubes(angle){
-					// 	ray.set(play.model.position, angle);
-					// 	var inter = ray.intersectObjects(blocks);
-					// 	if(inter.length > 0 && inter[0].distance < 0.5){
-					// 		// console.log(inter[0]);
-					// 		var vel = new THREE.Vector3(play.data.xv, 0, play.data.yv);
-					// 		vel.reflect(inter[0].face.normal);
-					// 		play.data.xv = vel.x * 0.3;
-					// 		play.data.yv = vel.z * 0.3;
-					// 		play.data.x += play.data.xv;
-					// 		play.data.y += play.data.yv;
-					// 	}
-					// }
-					// checkCubes(new THREE.Vector3(0, 0, 1));
-					// checkCubes(new THREE.Vector3(0, 0, -1));
-					// checkCubes(new THREE.Vector3(1, 0, 0));
-					// checkCubes(new THREE.Vector3(-1, 0, 0));
-
 					for(var w in map.children){
 						var wall = map.children[w];
 						var posi = new THREE.Vector2(play.data.x, play.data.y);
@@ -1027,7 +894,6 @@ function join(){
 								vel.reflect(wall.plane.normal);
 								play.data.xv = vel.x + BOUNCE_CORRECT * wall.plane.normal.x * Math.sign(wall.plane.normal.dot(play.model.position.clone().sub(wall.position)));
 								play.data.yv = vel.z + BOUNCE_CORRECT * wall.plane.normal.z * Math.sign(wall.plane.normal.dot(play.model.position.clone().sub(wall.position)));
-								//var dir = Math.normalize();
 								while(Math.abs(wall.plane.distanceToPoint(new THREE.Vector3(play.data.x, 0, play.data.y).sub(wall.position))) < WALL_SIZE){
 									play.data.x += play.data.xv;
 									play.data.y += play.data.yv;
@@ -1037,7 +903,6 @@ function join(){
 							}
 						}
 						if(posi.distanceTo(wall.p1) < WALL_SIZE + 0.1){
-							// console.log("o1");
 							var norm = posi.clone().sub(wall.p1);
 							norm = new THREE.Vector3(norm.x, 0, norm.y);
 							norm.normalize();
@@ -1053,7 +918,6 @@ function join(){
 							play.data.yv *= BOUNCE;
 						}
 						if(posi.distanceTo(wall.p2) < WALL_SIZE + 0.1){
-							// console.log("o2");
 							var norm = posi.clone().sub(wall.p2);
 							norm = new THREE.Vector3(norm.x, 0, norm.y);
 							norm.normalize();
@@ -1074,8 +938,6 @@ function join(){
 					if(play == players[me.ref.path.pieces_[2]]){
 						var totalCPs = checkpointsc ? checkpointsc.children.length : 0;
 
-						// Sequential checkpoint system — only the NEXT expected checkpoint triggers
-						// window._cpNext = index of next checkpoint to hit (0-based)
 						if(typeof window._cpNext === "undefined") window._cpNext = 0;
 
 						if(checkpointsc && totalCPs > 0 && window._cpNext < totalCPs){
@@ -1088,7 +950,6 @@ function join(){
 							}
 						}
 
-						// Start/finish line
 						for(var i in startc.children){
 							var cp = startc.children[i];
 							if(Math.abs(cp.plane.distanceToPoint(play.model.position.clone().sub(cp.position))) < 1){
@@ -1114,29 +975,24 @@ function join(){
 						document.getElementById("countdown").style.fontSize = "25vmin";
 						document.getElementById("countdown").innerHTML = play.data.name.replaceAll("<", "&lt;") + " Won!";
 
-						// ===== RECORD FINISH =====
 						if(play == players[me.ref.path.pieces_[2]] && !window._myFinishTime){
 							window._myFinishTime = window._raceStartTime ? (performance.now() - window._raceStartTime) : 0;
 							play.data.raceTime = window._myFinishTime;
 							play.data.finished = true;
 
-							// Work out finishing position from other players already done
 							if(!window._finishPositions) window._finishPositions = [];
 							window._finishPositions.push(me.ref.path.pieces_[2]);
 							var myPlace = window._finishPositions.length;
 
-							// Fastest lap from recorded lap splits
 							var lapSplits = window._myLapSplits || [];
 							var fastestLap = lapSplits.length ? Math.min.apply(null, lapSplits) : window._myFinishTime;
 
-							// Date key: "YYYY-MM-DD HH:00" (nearest hour)
 							var now = new Date();
 							var dateKey = now.getFullYear() + "-" +
 								String(now.getMonth()+1).padStart(2,"0") + "-" +
 								String(now.getDate()).padStart(2,"0") + " " +
 								String(now.getHours()).padStart(2,"0") + ":00";
 
-							// Map name from <title> tag or fallback
 							var mapName = (document.querySelector("#trackcode [data-name]") || {}).dataset &&
 								document.querySelector("#trackcode [data-name]").dataset.name ||
 								document.title || "Custom Track";
@@ -1157,9 +1013,7 @@ function join(){
 								dateKey: dateKey
 							};
 
-							// /games/<dateKey>/<gameCode>/results/<playerKey>
 							database.ref("games/" + dateKey + "/" + code + "/results/" + me.ref.path.pieces_[2]).set(resultData);
-							// /games/<dateKey>/<gameCode>/meta — written once by first finisher
 							database.ref("games/" + dateKey + "/" + code + "/meta").once("value", function(ms){
 								if(!ms.val()){
 									database.ref("games/" + dateKey + "/" + code + "/meta").set({
@@ -1173,30 +1027,35 @@ function join(){
 									});
 								}
 							});
-							// Per-PC history
 							database.ref("history/" + PC_ID).push(resultData);
 						} else if(!window._finishPositions){
 							window._finishPositions = [];
 						}
 
-						// Track other players finishing (for position counting)
 						var pk2 = Object.keys(players).find(function(k){ return players[k] == play; });
 						if(pk2 && window._finishPositions && window._finishPositions.indexOf(pk2) === -1){
 							window._finishPositions.push(pk2);
 						}
 					}
 
-					// Track race time for my player
+					// ===== RACE TIME & LAP SPLIT TRACKING (local player only) =====
 					if(play == players[me.ref.path.pieces_[2]] && window._raceStartTime && !window._myFinishTime){
 						play.data.raceTime = performance.now() - window._raceStartTime;
 
-						// Lap timer - reset when lap increases, record split
-						if(typeof window._lastTrackedLap === "undefined") window._lastTrackedLap = 1;
 						if(!window._myLapSplits) window._myLapSplits = [];
 						if(!window._finishPositions) window._finishPositions = [];
+
+						// FIX: _lastTrackedLap starts at 1 and we compare > 1 so first real lap
+						// completion (lap going from 1→2) triggers a split correctly.
+						if(typeof window._lastTrackedLap === "undefined") window._lastTrackedLap = 1;
+
 						if(play.data.lap > window._lastTrackedLap && window._lapStartTime){
 							var splitTime = performance.now() - window._lapStartTime;
-							window._myLapSplits.push(Math.round(splitTime));
+							// FIX: Guard against bogus near-zero splits caused by timing
+							// initialisation race. MIN_VALID_LAP_MS = 5000ms (5 seconds).
+							if(splitTime > MIN_VALID_LAP_MS){
+								window._myLapSplits.push(Math.round(splitTime));
+							}
 							window._lastTrackedLap = play.data.lap;
 							window._lapStartTime = performance.now();
 						}
@@ -1256,46 +1115,60 @@ function join(){
 
 			lap.innerHTML = me.data.lap <= LAPS ? me.data.lap + "/" + LAPS : "";
 			
-			// ===== UPDATE LEADERBOARD =====
+			// ===== UPDATE LEADERBOARD & LAP TIME PANEL =====
 			var lbRows = document.getElementById("lb-rows");
 			if(lbRows){
 				var myKey = me.ref.path.pieces_[2];
-				var myData = me.data;
 
-				// ---- Lap timer: driven purely by _lapStartTime reset in physics loop ----
+				// Current lap elapsed time
 				var lapElapsed = (window._lapStartTime && !window._myFinishTime)
 					? performance.now() - window._lapStartTime : 0;
 
-				// Update leaderboard lap timer
+				// Leaderboard lap timer
 				var ltEl = document.getElementById("lb-lap-timer");
 				if(ltEl) ltEl.textContent = window._myFinishTime ? "DONE" : fmtLapTime(lapElapsed);
 
 				// ---- Top-centre lap time panel ----
-				var ltCur = document.getElementById("lt-current");
-				var ltBest = document.getElementById("lt-best");
+				var ltCur     = document.getElementById("lt-current");
+				var ltBest    = document.getElementById("lt-best");
 				var ltOverall = document.getElementById("lt-overall");
+
 				if(ltCur) ltCur.textContent = window._myFinishTime ? "DONE" : ("LAP  " + fmtLapTime(lapElapsed));
+
+				// FIX: BEST shows running stopwatch until at least one lap is completed.
+				// Once a completed lap exists, it shows the fastest split and only then
+				// saves to Firebase (with the MIN_VALID_LAP_MS guard).
 				if(ltBest){
 					var splits = window._myLapSplits || [];
 					if(splits.length > 0){
+						// At least one completed lap — show best split
 						var sessionBest = Math.min.apply(null, splits);
 						if(!window._sessionBestLap || sessionBest < window._sessionBestLap){
 							window._sessionBestLap = sessionBest;
 							if(!window._overallBestLap || sessionBest < window._overallBestLap){
 								window._overallBestLap = sessionBest;
 								window._overallBestName = me.data.name;
-								var mapKey = (document.title || "track").replace(/[^a-zA-Z0-9_]/g,"_");
-								database.ref("bestlaps/" + mapKey).set({ lapTime: sessionBest, name: me.data.name, pcId: PC_ID, timestamp: Date.now() });
+								// FIX: Only write to Firebase if the lap time is plausible
+								if(sessionBest > MIN_VALID_LAP_MS){
+									var mapKey = (document.title || "track").replace(/[^a-zA-Z0-9_]/g,"_");
+									database.ref("bestlaps/" + mapKey).set({
+										lapTime: sessionBest,
+										name: me.data.name,
+										pcId: PC_ID,
+										timestamp: Date.now()
+									});
+								}
 								if(ltOverall) ltOverall.textContent = "RECORD  " + fmtLapTime(sessionBest) + "  (" + me.data.name + ")";
 							}
 						}
 						ltBest.textContent = "BEST  " + fmtLapTime(sessionBest);
 					} else {
-						ltBest.textContent = "BEST  --:--.---";
+						// FIX: No completed lap yet — show current lap as live stopwatch
+						ltBest.textContent = "BEST  " + fmtLapTime(lapElapsed);
 					}
 				}
 
-				// ---- Build sorted data ----
+				// ---- Build sorted leaderboard data ----
 				var lbData = [];
 				var totalCPsLB = checkpointsc ? checkpointsc.children.length : 0;
 				for(var pk in players){
@@ -1310,7 +1183,6 @@ function join(){
 							elapsed = pd.raceTime || 0;
 						}
 					}
-					// Progress: lap * (totalCPs+1) + checkpoints hit this lap
 					var cpHit = pd.cpProgress || 0;
 					var progress = (pd.lap || 0) * (totalCPsLB + 1) + cpHit;
 					lbData.push({
@@ -1328,11 +1200,10 @@ function join(){
 					if(a.finished && b.finished) return a.raceTime - b.raceTime;
 					if(a.finished) return -1;
 					if(b.finished) return 1;
-					// Sort by progress (lap * (totalCPs+1) + checkpoints hit this lap)
 					return b.progress - a.progress;
 				});
 
-				// ---- Position badge ----
+				// Position badge
 				var myPos = 1;
 				for(var pi = 0; pi < lbData.length; pi++){
 					if(lbData[pi].key === myKey){ myPos = pi + 1; break; }
@@ -1342,13 +1213,13 @@ function join(){
 					var suffixes = ["","st","nd","rd"];
 					var suf = myPos <= 3 ? suffixes[myPos] : "th";
 					badge.textContent = myPos + suf;
-					badge.className = ""; // reset
+					badge.className = "";
 					if(myPos === 1) badge.className = "pos-1st";
 					else if(myPos === 2) badge.className = "pos-2nd";
 					else if(myPos === 3) badge.className = "pos-3rd";
 				}
 
-				// ---- Rows ----
+				// Leaderboard rows
 				function fmtTime(ms){
 					var m = Math.floor(ms / 60000);
 					var s = Math.floor((ms % 60000) / 1000);
@@ -1379,7 +1250,6 @@ function join(){
 						"</div>";
 				}
 				lbRows.innerHTML = html;
-				
 			}
 		}else{
 			camera.position.set(50 * Math.sin(x), 20, 50 * Math.cos(x));
@@ -1533,7 +1403,6 @@ codeCheck = function(){
 				});
 
 				database.ref(code + "/players").on("child_changed", function(p){
-					// console.log(p);
 					players[p.ref_.path.pieces_[2]].data = p.val();
 				});
 				console.log("playerCount: " + playerCount);
@@ -1572,7 +1441,7 @@ codeCheck = function(){
 						f.appendChild(countDown);
 
 						lap = document.createElement("DIV");
-						lap.innerHTML = "1/3";
+						lap.innerHTML = "1/" + LAPS;
 						lap.className = "title";
 						lap.id = "lap";
 						f.appendChild(lap);
@@ -1599,14 +1468,15 @@ codeCheck = function(){
 						lb.style.display = "block";
 						f.appendChild(lb);
 
-						// ===== LAP TIME PANEL (top right) =====
+						// ===== LAP TIME PANEL =====
 						setupLapTimePanel();
 
-						// ===== LAP TIMER =====
+						// Reset all timing state
 						window._raceStartTime = null;
 						window._myFinishTime = null;
 						window._lapStartTime = null;
-						window._lastTrackedLap = 0;
+						window._lastTrackedLap = 1;  // FIX: was 0, must be 1
+						window._myLapSplits = [];    // FIX: always reset cleanly
 
 						setTimeout(function(){ countDown.innerHTML = "2"; }, 1000);
 						setTimeout(function(){ countDown.innerHTML = "1"; }, 2000);
@@ -1614,7 +1484,7 @@ codeCheck = function(){
 							countDown.innerHTML = "GO!";
 							gameSortaStarted = false;
 							window._raceStartTime = performance.now();
-							window._lapStartTime = performance.now();
+							window._lapStartTime = performance.now(); // FIX: starts at GO
 						}, 3000);
 						setTimeout(function(){ countDown.innerHTML = ""; }, 4000);
 					}
@@ -1645,7 +1515,6 @@ codeCheck = function(){
 function startGame(){
 	database.ref(code + "/status").set(1);
 
-	// Write initial game session record under /games/<dateKey>/<code>/meta
 	var now = new Date();
 	var dateKey = now.getFullYear() + "-" +
 		String(now.getMonth()+1).padStart(2,"0") + "-" +
@@ -1665,11 +1534,10 @@ function startGame(){
 }
 
 window.onkeydown = function(e){
-	if(e.keyCode == 37 || e.keyCode == 65) left = true;   // Left arrow or A
-	if(e.keyCode == 39 || e.keyCode == 68) right = true;  // Right arrow or D
+	if(e.keyCode == 37 || e.keyCode == 65) left = true;
+	if(e.keyCode == 39 || e.keyCode == 68) right = true;
 	if(e.keyCode == 16) boostHeld = true;
 	if(e.keyCode == 32){ braking = true; e.preventDefault(); }
-	// Clutch: 1, 2, 3, 4, Z, M — stops acceleration, car keeps rolling
 	if(e.keyCode == 49 || e.keyCode == 50 || e.keyCode == 51 || e.keyCode == 52 ||
 	   e.keyCode == 90 || e.keyCode == 77){
 		clutch = true;
@@ -1677,11 +1545,10 @@ window.onkeydown = function(e){
 }
 
 window.onkeyup = function(e){
-	if(e.keyCode == 37 || e.keyCode == 65) left = false;   // Left arrow or A
-	if(e.keyCode == 39 || e.keyCode == 68) right = false;  // Right arrow or D
+	if(e.keyCode == 37 || e.keyCode == 65) left = false;
+	if(e.keyCode == 39 || e.keyCode == 68) right = false;
 	if(e.keyCode == 16) boostHeld = false;
 	if(e.keyCode == 32) braking = false;
-	// Release clutch
 	if(e.keyCode == 49 || e.keyCode == 50 || e.keyCode == 51 || e.keyCode == 52 ||
 	   e.keyCode == 90 || e.keyCode == 77){
 		clutch = false;
