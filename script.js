@@ -1311,20 +1311,18 @@ function join(){
 				var ltBest = document.getElementById("lt-best");
 				var ltOverall = document.getElementById("lt-overall");
 				if(ltCur) ltCur.textContent = window._myFinishTime ? ("DONE  " + fmtLapTime(window._myFinishTime)) : ("LAP  " + fmtLapTime(lapElapsed));
-				if(ltBest){
-					var splits = window._myLapSplits || [];
-					if(splits.length > 0){
-						var sessionBest = Math.min.apply(null, splits);
-						if(!window._sessionBestLap || sessionBest < window._sessionBestLap){
-    					window._sessionBestLap = sessionBest;
-							}
-						}
-						ltBest.textContent = "BEST  " + fmtLapTime(sessionBest);
-					} else {
-						ltBest.textContent = "BEST  --:--.---";
+					if(ltBest){
+   					 var splits = window._myLapSplits || [];
+   					 if(splits.length > 0){
+    				    var sessionBest = Math.min.apply(null, splits);
+     				    if(!window._sessionBestLap || sessionBest < window._sessionBestLap){
+          			  window._sessionBestLap = sessionBest;
+     				   }
+       					 ltBest.textContent = "BEST  " + fmtLapTime(sessionBest);
+   				 } else {
+   					     ltBest.textContent = "BEST  --:--.---";
+  						  }
 					}
-				}
-
 				// ---- Build sorted data ----
 				var lbData = [];
 				var totalCPsLB = checkpointsc ? checkpointsc.children.length : 0;
