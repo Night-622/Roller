@@ -55,7 +55,7 @@ function setupLapTimePanel(){
 	var ltPanel = document.createElement("DIV");
 	ltPanel.id = "laptime-panel";
 	ltPanel.style.cssText = [
-		"position:absolute",
+		"posion:absolute",
 		"top:10px",
 		"left:50%",
 		"transform:translateX(-50%)",
@@ -66,7 +66,7 @@ function setupLapTimePanel(){
 		"pointer-events:none",
 		"z-index:9999",
 		"line-height:1.7",
-		"white-space:nowrap"
+		"whe-space:nowrap"
 	].join(";");
 	ltPanel.innerHTML =
 		"<div id='lt-current'  style='font-size:2vmin'>LAP &nbsp;--:--.---</div>" +
@@ -80,7 +80,7 @@ function setupLapTimePanel(){
 	window._overallBestLap = null;
 	window._overallBestName = null;
 	window._sessionBestLap = null;
-	window._myLapSplits = window._myLapSplits || [];
+	window._myLapSpls = window._myLapSpls || [];
 	var mapKey = getMapRecordKey();
 	if(typeof database !== "undefined"){
 		database.ref("bestlaps/" + mapKey).once("value", function(snap){
@@ -1316,13 +1316,7 @@ function join(){
 					if(splits.length > 0){
 						var sessionBest = Math.min.apply(null, splits);
 						if(!window._sessionBestLap || sessionBest < window._sessionBestLap){
-							window._sessionBestLap = sessionBest;
-							if(!window._overallBestLap || sessionBest < window._overallBestLap){
-								window._overallBestLap = sessionBest;
-								window._overallBestName = me.data.name;
-								var mapKey = getMapRecordKey();
-								database.ref("bestlaps/" + mapKey).set({ lapTime: sessionBest, name: me.data.name, pcId: PC_ID, timestamp: Date.now() });
-								if(ltOverall) ltOverall.textContent = "RECORD  " + fmtLapTime(sessionBest) + "  (" + me.data.name + ")";
+    					window._sessionBestLap = sessionBest;
 							}
 						}
 						ltBest.textContent = "BEST  " + fmtLapTime(sessionBest);
@@ -2846,6 +2840,18 @@ function join(){
 							window._myFinishTime = window._raceStartTime ? (performance.now() - window._raceStartTime) : 0;
 							play.data.raceTime = window._myFinishTime;
 							play.data.finished = true;
+
+							play.data.finished = true;
+
+				// Update the map record if this finish beats it
+					if(!window._overallBestLap || window._myFinishTime < window._overallBestLap){
+   						 window._overallBestLap = window._myFinishTime;
+   						 window._overallBestName = me.data.name;
+  					 	 var mapKey = getMapRecordKey();
+  					 	 database.ref("bestlaps/" + mapKey).set({ lapTime: window._myFinishTime, name: me.data.name, pcId: PC_ID, timestamp: Date.now() });
+   						 var ltOverall = document.getElementById("lt-overall");
+   						 if(ltOverall) ltOverall.textContent = "RECORD  " + fmtLapTime(window._myFinishTime) + "  (" + me.data.name + ")";
+						}
 
 							// Record the final lap split (the last lap never gets recorded in the tracking block below
 							// because that block is guarded by !window._myFinishTime which is now set)
