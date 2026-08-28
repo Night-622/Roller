@@ -30,51 +30,102 @@ var DEFAULT_MAP_DATA = (function(){
 var MAP2_DATA = "-1,0/-1,-4 -1,0/-1,8 -1,8/-3,11 -3,11/-10,11 -8,11/-10,11 -10,11/-12,9 -12,9/-12,4 -12,5/-12,3 -12,3/-14,1 -14,1/-14,-2 -14,-2/-12,-4 -12,-4/-10,-4 -10,-4/-8,-2 -8,-2/-8,7 -8,7/-6,9 -6,9/-4,9 -4,9/-3,8 -3,8/-2,7 -2,7/-2,-6 -2,-6/1,-10 1,-10/9,-10 9,-10/13,-6 13,-6/13,11 14,11/13,11 14,11/16,11 16,11/17,14 17,14/17,21 17,21/16,24 16,24/13,26 13,26/9,27 9,27/6,27 6,27/4,26 4,26/4,13 4,13/5,11 5,11/7,11 7,11/8,13 8,13/8,23 8,23/10,24 10,24/12,24 12,24/14,22 14,22/14,14 14,14/11,9 11,9/11,-6 13,-6/13,-6 11,-6/7,-9 7,-9/2,-9 2,-9/-1,-4 1,0/1,8 1,8/1,10 1,10/-2,13 -2,14/-2,13 -2,14/-13,13 -13,13/-15,10 -15,10/-15,3 -15,3/-17,1 -17,1/-17,-4 -17,-4/-17,-7 -17,-7/-10,-6 -10,-6/-8,-5 -7,-5/-8,-5 -7,-5/-5,-2 -5,-2/-5,6 -5,7/-6,6 -5,7/-4,6 -5,-2/-5,-8 -5,-8/-1,-12 -1,-12/11,-12 11,-12/17,-7 17,-7/16,7 16,7/16,8 16,8/15,9 15,9/20,9 20,9/22,15 22,15/21,25 21,25/13,32 13,32/3,32 3,32/0,29 0,29/1,10 1,10/3,8 3,8/8,8 8,8/11,13 11,13/11,22 11,22/10,21 10,21/11,20 11,20/12,21 11,21/12,21 8,8/8,-4 8,-4/6,-6 6,-6/4,-6 4,-6/1,0 |-1,2/1,2 13,11/15,9 |-12,-1 -12,-1 -10,-2 -10,-2 -11,2 -11,2 -10,1 -10,1 -10,8 -10,8 -10,5 -9,9 -9,9 -8,10 -4,10 -4,10 3,5 3,6 3,1 3,1 3,-1 5,-3 5,-3 7,1 7,1 6,5 6,5 6,1 6,-2 5,4 5,4 -5,5 -9,4 6,13 5,16 5,16 7,15 6,19 5,18 7,17 7,17 7,21 6,21 6,21 6,23 6,23 6,25 7,25 7,25 10,25 10,25 13,25 15,23 15,23 16,20 16,20 15,19 16,14 15,13 15,13 16,16 16,16 12,7 12,5 12,5 12,1 12,1 12,-2 12,-2 0,-7 10,-8 10,-8 -7,-6 -11,-8 -11,-8 -5,-10 -2,-15 -2,-15 1,-15 4,-15 11,-15 11,-15 11,-13 11,-13 16,-13 16,-13 16,-12 16,-12 21,-8 21,-6 17,2 17,2 23,-1 23,-1 23,-1 19,-1 21,3 18,7 25,9 25,20 25,20 29,20 29,20 25,16 25,16 22,32 22,32 24,27 24,27 17,35 17,35 11,37 11,37 3,37 3,37 8,34 8,34 -5,38 -5,32 1,32 -9,28 -8,28 -2,23 -8,24 -7,18 -7,18 -5,18 -18,23 -18,23 -2,21 -2,21 0,17 0,14 0,14 -6,18 -6,18 -4,16 -13,16 -12,20 -10,15 -11,15 -18,20 -17,13 -17,13 -17,13 -17,13 -22,13 -22,13 -19,10 -19,10 -26,6 -26,6 -17,6 -17,6 -23,6 -22,3 -19,3 -19,3 -23,-2 -18,-2 -18,-2 -19,1 -19,1 -21,-7 -21,-7 -17,-9 -25,-6 -25,-6 -22,-12 -22,-12 -14,-10 -14,-10 -16,-16 -8,-11 -8,-11 -12,-11 -9,-12 -4,-16 -3,-16 -4,-12 -4,-12 -6,-15 -6,-15 3,-14 3,-14 5,-14 5,-14 6,-14 7,-14 10,-15 10,-15 9,-15 15,-12 15,-12 17,-10 17,-10 13,-12 19,-11 19,-11 21,6 21,6 24,14 24,14 24,23 24,23 20,31 20,31 13,34 13,34 15,32 15,32 18,30 18,30 20,28 20,28 22,28 22,28 23,21 24,9 24,9 23,9 23,9 24,14 23,12 23,12 -4,29 -4,29 -3,27 -3,26 |0,3,3/0 0,3,6/0 0,3,9/51 -3,3,12/90 -5,3,12/86 -9,3,12/102 -12,3,11/146 -13,3,9/180 -13,3,5/155 -14,3,2/153 -15,3,0/183 -15,3,-5/-87 -11,3,-5/-67 -7,3,-3/-6 -7,3,-1/0 -7,3,3/0 -7,3,6/-48 -5,3,8/243 -3,3,6/180 -3,3,2/180 -3,3,-1/183 -3,3,-6/194 -2,3,-9/239 1,3,-11/-90 5,3,-11/-90 7,3,-11/-80 11,3,-10/-42 13,3,-8/-22 15,3,-4/0 15,3,0/3 14,3,4/-4 15,3,9/-42 16,3,10/-82 19,3,11/0 19,3,14/-4 19,3,18/2 19,3,24/42 16,3,27/65 11,3,30/95 6,3,29/111 3,3,28/180 3,3,24/180 3,3,20/180 3,3,15/180 3,3,11/237 6,3,10/-78 9,3,10/0 9,3,14/0 9,3,16/-4 9,3,20/-38 11,3,22/260 12,3,22/196 13,3,20/180 13,3,17/173 13,3,15/180 13,3,13/143 12,3,12/146 11,3,10/174 10,3,8/180 10,3,5/180 10,3,2/180 10,3,-1/180 10,3,-4/138 8,3,-6/110 6,3,-7/90 3,3,-7/36 1,3,-4/0 1,3,-1/9 0,3,1/0 |-1,4/1,4 -1,6/1,6 -1,8/1,8 -1,8/1,10 -2,10/0,12 -3,11/-2,13 -2,14/-4,11 -5,11/-5,14 -7,11/-7,14 -8,11/-8,14 -9,11/-11,14 -10,11/-13,13 -12,9/-15,10 -12,7/-15,7 -12,5/-15,5 -12,3/-15,3 -14,1/-17,1 -14,-1/-17,-1 -14,-2/-17,-4 -13,-3/-17,-7 -12,-4/-12,-7 -10,-4/-10,-6 -8,-2/-8,-5 -8,-2/-7,-5 -8,-2/-5,-2 -5,1/-8,1 -8,3/-5,3 -5,5/-8,5 -5,6/-8,7 -5,6/-6,9 -5,6/-4,9 -5,6/-2,7 -5,5/-2,5 -5,3/-2,3 -5,1/-2,1 -5,-1/-2,-1 -5,-3/-2,-3 -5,-5/-2,-5 -5,-8/-2,-6 -3,-10/0,-8 -1,-12/1,-10 2,-12/2,-10 4,-12/4,-10 6,-12/6,-10 8,-12/8,-10 11,-12/9,-10 10,-9/13,-11 11,-8/14,-10 12,-7/15,-9 13,-6/17,-7 13,-4/17,-4 13,-1/17,-1 13,1/17,1 13,3/16,3 13,5/16,5 13,7/16,7 13,9/15,9 13,11/15,9 16,11/16,9 16,11/20,9 17,14/22,15 17,17/23,17 17,20/22,20 17,21/21,25 16,24/19,27 13,26/16,30 13,32/9,27 8,27/7,32 6,27/3,32 4,26/0,29 4,25/0,25 4,22/0,22 4,20/0,20 4,18/0,18 4,16/0,16 4,14/0,14 4,13/0,13 5,11/0,11 5,11/3,8 6,11/6,8 7,11/8,8 8,13/10,10 8,13/11,13 8,15/11,15 8,17/11,17 8,19/11,19 11,20/8,21 11,20/8,23 11,20/10,24 11,20/12,24 11,20/14,22 11,20/14,20 11,20/14,17 11,17/14,17 11,15/14,15 11,13/13,12 11,9/11,13 11,9/8,8 11,7/8,7 11,5/8,5 11,3/8,3 11,1/8,1 11,-1/8,-1 11,-3/8,-3 8,-4/11,-6 7,-5/10,-8 6,-6/7,-9 4,-6/5,-9 4,-6/3,-9 4,-5/1,-8 3,-4/0,-7 3,-3/-1,-4 2,-2/-1,-2 1,0/-1,0 1,1/-1,1 |";
 var MAP3_DATA = "-1,6/1,12 1,12/6,15 6,15/11,15 11,15/14,17 14,17/14,20 14,20/11,22 11,22/-1,22 -1,22/-6,17 -6,17/-6,10 -6,10/-11,6 -11,6/-18,6 -18,6/-11,6 -11,6/-7,2 -7,2/-7,-14 -7,-14/-3,-16 -3,-16/3,-16 3,-16/8,-13 8,-13/8,-8 8,-8/11,-4 11,-4/11,0 11,0/14,2 14,2/14,6 14,5/14,7 14,7/13,9 13,9/11,9 11,9/9,7 9,7/9,3 9,3/7,-7 7,-7/7,-12 7,-12/-3,-12 -3,-12/-5,-11 -5,-11/-5,-9 -5,-9/-3,-7 -3,-7/3,-7 3,-7/3,-6 3,-5/-3,-6 3,-6/3,-5 -3,-6/-5,-4 -5,-4/-5,-2 -5,-2/-4,-1 -4,-1/-2,-1 1,4/3,9 3,9/7,11 7,11/13,12 13,12/17,16 17,16/17,23 17,23/14,25 14,25/-2,25 -2,25/-9,19 -9,19/-9,11 -9,11/-12,9 -12,9/-20,9 -20,9/-23,6 -23,6/-20,3 -20,3/-12,3 -12,3/-10,0 -10,0/-10,-15 -10,-15/-4,-19 -4,-19/5,-19 11,-14/11,-9 11,-9/14,-5 14,-5/14,-1 14,-1/18,2 18,2/18,9 18,9/13,12 7,11/6,4 6,4/5,-10 5,-10/-3,-10 -3,-10/-2,-9 -2,-9/5,-9 4,-3/5,-3 5,-3/5,-9 4,-3/-2,-4 -2,-4/-3,-3 -3,-3/4,-3 -19,6/-18,7 -19,6/-18,5 -18,5/-15,5 3,-3/3,0 5,-3/5,-3 3,-1/1,3 1,3/1,4 -1,6/-1,3 -1,3/-2,2 -2,2/-2,-1 5,-19/9,-16 9,-16/11,-14 |-2,1/2,1 8,-13/11,-14 |-6,5 -4,2 -4,2 -3,2 -3,3 -3,4 -3,5 -3,6 -3,6 -3,6 -3,7 -3,7 -3,12 -3,12 0,14 0,14 -4,16 -4,16 0,16 -2,18 3,18 3,18 0,21 5,18 6,20 9,16 9,16 12,21 12,21 12,19 12,19 9,19 9,20 5,16 4,16 -4,8 -4,8 -5,0 -5,0 -6,-5 -6,-5 -6,-8 -6,-12 -6,-12 -3,-13 -3,-13 0,-13 0,-13 2,-15 4,-13 -1,-15 -1,-15 -15,-1 -14,-6 -14,-6 -21,-6 -12,-4 -12,-4 -12,-3 -13,-3 -15,-3 -16,-3 -18,-2 -20,-2 -20,-1 -21,-1 -21,-1 -21,-1 -21,-1 -21,-1 -21,-1 -21,-1 -26,2 -26,2 -26,3 -26,4 -26,6 -26,7 -25,9 -24,12 -23,13 -21,15 -20,15 -18,16 -16,16 -15,16 -15,15 -14,15 -13,15 -13,15 -13,15 -13,15 -13,15 -13,15 -13,14 -19,12 -19,12 -19,12 -19,12 -17,12 -16,12 -15,12 -15,13 -13,14 -13,16 -12,18 -11,19 -11,19 -11,19 -11,20 -11,20 -11,21 -11,21 -11,22 -11,22 -8,25 -8,25 -7,26 -6,26 -2,27 -1,28 0,28 2,28 4,28 5,28 7,27 8,27 11,27 11,27 11,27 15,27 17,27 19,27 20,27 21,27 22,26 22,26 22,26 22,25 22,25 21,25 21,25 21,22 21,19 21,16 21,12 21,6 21,2 21,0 21,-2 21,-3 21,-4 21,-4 21,-4 21,-4 21,-4 19,-1 19,-1 19,-2 18,-4 17,-10 16,-12 15,-14 15,-16 14,-19 14,-20 13,-21 13,-21 13,-21 13,-21 13,-21 12,-20 12,-20 12,-20 11,-20 9,-20 7,-21 2,-21 0,-21 -2,-21 -6,-21 -8,-21 -10,-21 -13,-21 -13,-21 -14,-20 -14,-20 -14,-20 -11,-19 -11,-19 -11,-18 -11,-18 -11,-16 -12,-14 -13,-12 -15,-10 -20,-6 -21,-5 -23,-3 -24,-2 -24,-1 -19,-8 -19,-8 -17,-13 -17,-13 -21,-14 13,-9 19,-10 18,-6 25,-6 25,-6 25,5 25,5 23,9 23,9 20,11 20,11 26,14 26,14 15,13 19,21 19,21 19,13 23,22 23,22 18,31 18,32 12,29 -23,6 4,5 4,5 3,2 3,2 3,0 3,0 6,9 4,7 -17,6 |0,3,3/-10 1,3,7/-32 3,3,11/-67 8,3,13/-82 14,3,15/-23 15,3,20/26 12,3,23/90 4,3,23/100 -2,3,23/125 -5,3,19/141 -8,3,16/176 -9,3,9/116 -15,3,7/94 -20,3,7/191 -19,3,4/-85 -16,3,4/252 -9,3,2/187 -9,3,-4/180 -9,3,-12/216 -6,3,-16/249 0,3,-18/-88 4,3,-17/-52 7,3,-15/-45 10,3,-12/0 10,3,-8/-27 13,3,-3/-18 14,3,0/-24 16,3,4/2 15,3,9/48 13,3,11/101 9,3,10/180 8,3,8/176 8,3,3/174 8,3,0/163 7,3,-3/171 6,3,-7/180 6,3,-11/93 2,3,-11/90 -3,3,-11/30 -4,3,-10/-49 -1,3,-8/265 2,3,-8/-74 4,3,-7/0 4,3,-4/108 2,3,-5/97 -2,3,-5/45 -4,3,-4/-21 -3,3,-2/-90 -1,3,-2/-19 |-1,3/1,3 -1,5/1,4 -1,6/2,6 -1,8/3,8 0,10/3,9 1,12/7,11 4,14/7,11 6,15/7,11 9,15/9,11 11,15/11,11 14,17/13,12 17,16/14,17 14,20/17,23 11,22/14,25 8,22/8,25 5,22/5,25 3,22/3,25 1,22/1,25 -1,22/-2,25 -3,19/-6,22 -4,18/-8,20 -6,17/-9,17 -9,15/-6,15 -6,13/-9,13 -9,11/-6,11 -7,9/-12,9 -11,6/-12,9 -14,6/-14,9 -16,6/-16,9 -17,6/-18,9 -17,6/-20,9 -17,6/-23,6 -17,6/-20,3 -17,6/-18,3 -17,6/-16,3 -15,6/-15,3 -12,6/-13,3 -12,3/-9,4 -7,2/-10,0 -10,-2/-7,-2 -10,-4/-7,-4 -7,-6/-10,-6 -10,-8/-7,-8 -7,-10/-10,-10 -10,-12/-7,-12 -10,-14/-7,-14 -7,-14/-8,-17 -5,-15/-6,-18 -3,-16/-4,-19 -1,-16/-1,-19 2,-16/2,-19 3,-16/5,-19 5,-15/8,-17 7,-13/9,-16 8,-13/11,-13 8,-11/11,-11 11,-9/8,-9 11,-9/9,-7 10,-5/13,-7 11,-4/14,-5 11,-2/14,-2 14,-1/11,0 14,2/16,0 14,2/18,2 14,4/18,4 14,6/18,6 14,7/18,9 13,9/13,12 11,9/11,12 9,7/9,12 9,7/7,11 9,7/6,7 9,5/6,5 9,3/6,4 9,2/5,1 5,-1/9,0 8,-3/5,-3 8,-5/5,-5 7,-7/5,-7 7,-9/5,-9 5,-10/7,-12 3,-10/3,-12 1,-10/1,-12 -1,-10/-1,-12 -3,-10/-3,-12 -3,-10/-5,-10 -2,-9/-3,-7 0,-9/0,-7 2,-9/2,-7 3,-7/5,-9 5,-6/3,-6 3,-5/5,-5 5,-3/3,-5 2,-3/2,-6 0,-6/0,-3 -2,-6/-2,-3 -5,-4/-3,-3 -3,-3/-5,-2 -4,-1/-2,-3 -2,-1/0,-3 -2,-1/3,-2 -2,0/3,0 |";
 
-// Builds a tiny top-down line-preview (SVG) of a map's track code, so the host
-// can see roughly what each map looks like before picking it.
-function buildMapPreviewSVG(trackData){
-	var racePart = (trackData || "").split("|")[0].trim();
-	if(!racePart) return "";
-	var tokens = racePart.split(" ");
-	var segs = [];
-	for(var i = 0; i < tokens.length; i++){
-		var parts = tokens[i].split("/");
-		if(parts.length != 2) continue;
-		var a = parts[0].split(",");
-		var b = parts[1].split(",");
-		if(a.length < 2 || b.length < 2) continue;
-		var x1 = parseFloat(a[0]), y1 = parseFloat(a[1]), x2 = parseFloat(b[0]), y2 = parseFloat(b[1]);
-		if(isNaN(x1) || isNaN(y1) || isNaN(x2) || isNaN(y2)) continue;
-		segs.push([x1, y1, x2, y2]);
+// Builds an actual (miniature) 3D version of a map's track walls - the same
+// geometry the real game uses - so it can be shown as a slowly rotating
+// preview. Returns the group (pre-centered on the origin) and a radius big
+// enough to fit a camera around it.
+function buildMapPreviewGroup(trackData){
+	var racedata = (trackData || "").trim().split("|")[0].trim().split(" ");
+	var material = new THREE.MeshLambertMaterial({color: new THREE.Color(0xf48342)});
+	var group = new THREE.Object3D();
+	var minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
+	for(var i = 0; i < racedata.length; i++){
+		if(racedata[i] == "") continue;
+		var p1s = racedata[i].split("/")[0].split(",");
+		var p2s = racedata[i].split("/")[1].split(",");
+		if(p1s.length < 2 || p2s.length < 2) continue;
+		var point1 = new THREE.Vector2(parseInt(p1s[0]), parseInt(p1s[1]));
+		var point2 = new THREE.Vector2(parseInt(p2s[0]), parseInt(p2s[1]));
+		var wall = new THREE.Mesh(
+			new THREE.BoxBufferGeometry(point1.distanceTo(point2) * mapscale + 0.3, 1.5, 0.3),
+			material
+		);
+		var angle = Math.atan2((point1.y - point2.y), (point1.x - point2.x));
+		var wx = -(point1.x + point2.x) / 2 * mapscale;
+		var wz = (point1.y + point2.y) / 2 * mapscale;
+		wall.position.set(wx, 0.75, wz);
+		wall.rotation.set(0, angle, 0, "YXZ");
+		group.add(wall);
+		minX = Math.min(minX, wx); maxX = Math.max(maxX, wx);
+		minZ = Math.min(minZ, wz); maxZ = Math.max(maxZ, wz);
 	}
-	if(!segs.length) return "";
-	var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-	for(var i = 0; i < segs.length; i++){
-		var s = segs[i];
-		minX = Math.min(minX, s[0], s[2]);
-		maxX = Math.max(maxX, s[0], s[2]);
-		minY = Math.min(minY, s[1], s[3]);
-		maxY = Math.max(maxY, s[1], s[3]);
+	if(!isFinite(minX)){ minX = maxX = minZ = maxZ = 0; }
+	var cx = (minX + maxX) / 2, cz = (minZ + maxZ) / 2;
+	for(var i = 0; i < group.children.length; i++){
+		group.children[i].position.x -= cx;
+		group.children[i].position.z -= cz;
 	}
-	var w = (maxX - minX) || 1, h = (maxY - minY) || 1;
-	var pad = Math.max(w, h) * 0.08;
-	var vbW = w + pad * 2, vbH = h + pad * 2;
-	var strokeW = (Math.max(w, h) * 0.025).toFixed(2);
-	var lines = "";
-	for(var i = 0; i < segs.length; i++){
-		var s = segs[i];
-		lines += "<line x1='" + (s[0] - minX + pad).toFixed(2) + "' y1='" + (s[1] - minY + pad).toFixed(2) +
-			"' x2='" + (s[2] - minX + pad).toFixed(2) + "' y2='" + (s[3] - minY + pad).toFixed(2) +
-			"' stroke='white' stroke-width='" + strokeW + "' stroke-linecap='round'/>";
-	}
-	return "<svg viewBox='0 0 " + vbW.toFixed(2) + " " + vbH.toFixed(2) + "' xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='xMidYMid meet'>" + lines + "</svg>";
+	var spanX = (maxX - minX) || 1, spanZ = (maxZ - minZ) || 1;
+	var radius = Math.sqrt(spanX * spanX + spanZ * spanZ) / 2 || 10;
+	return { group: group, radius: radius };
 }
 
-var MAP1_PREVIEW_SVG = buildMapPreviewSVG(DEFAULT_MAP_DATA);
-var MAP2_PREVIEW_SVG = buildMapPreviewSVG(MAP2_DATA);
-var MAP3_PREVIEW_SVG = buildMapPreviewSVG(MAP3_DATA);
+// Tracks the running preview animation loops so they can be stopped/disposed
+// once the host picks a map (or the picker is rebuilt).
+window._mapPreviewCleanups = window._mapPreviewCleanups || [];
+function stopMapPreviews(){
+	for(var i = 0; i < window._mapPreviewCleanups.length; i++){
+		try{ window._mapPreviewCleanups[i](); }catch(e){}
+	}
+	window._mapPreviewCleanups = [];
+}
+
+// Renders a small, continuously-rotating 3D view of a map inside the given
+// container element (by id). Uses its own isolated scene/camera/renderer so
+// it doesn't touch the real game scene.
+function initMapPreview(containerId, trackData){
+	var container = document.getElementById(containerId);
+	if(!container) return;
+	var built = buildMapPreviewGroup(trackData);
+	var w = container.clientWidth || 200, h = container.clientHeight || 200;
+
+	var pscene = new THREE.Scene();
+	var dist = built.radius * 2 + 6;
+	var camera = new THREE.PerspectiveCamera(45, w / h, 0.1, built.radius * 12 + 100);
+	camera.position.set(0, dist * 0.8, dist);
+	camera.lookAt(0, 0, 0);
+
+	var light = new THREE.DirectionalLight(0xffffff, 0.9);
+	light.position.set(50, 100, 50);
+	pscene.add(light);
+	pscene.add(new THREE.AmbientLight(0xffffff, 0.6));
+	pscene.add(built.group);
+
+	var renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
+	renderer.setSize(w, h);
+	renderer.setClearColor(0x000000, 0);
+	container.innerHTML = "";
+	container.appendChild(renderer.domElement);
+
+	var rafId, stopped = false;
+	function animate(){
+		if(stopped) return;
+		built.group.rotation.y += 0.008;
+		renderer.render(pscene, camera);
+		rafId = requestAnimationFrame(animate);
+	}
+	animate();
+
+	window._mapPreviewCleanups.push(function(){
+		stopped = true;
+		cancelAnimationFrame(rafId);
+		renderer.dispose();
+	});
+}
 
 // Shown when the host clicks "Host a game", before the game code is generated.
+// The three built-in maps (rendered as live rotating 3D previews) take up
+// 70% of the screen; the custom-map paste area takes up the other 30%.
 chooseMapThenHost = function(){
 	document.getElementById("host").onclick = null;
 	f.style.transform = "translate3d(0, -100vh, 0)";
@@ -82,21 +133,27 @@ chooseMapThenHost = function(){
 		f.innerHTML = "<div class='info title'>Choose a map</div>" +
 			"<div id='mapscreen'>" +
 			"<div id='mapcards'>" +
-			"<div class='mapcard' onclick='selectMap(1)'><div class='mappreview'>" + MAP1_PREVIEW_SVG + "</div><div class='mapcard-label'>Solara</div></div>" +
-			"<div class='mapcard' onclick='selectMap(2)'><div class='mappreview'>" + MAP2_PREVIEW_SVG + "</div><div class='mapcard-label'>Centrix</div></div>" +
-			"<div class='mapcard' onclick='selectMap(3)'><div class='mappreview'>" + MAP3_PREVIEW_SVG + "</div><div class='mapcard-label'>Nexus</div></div>" +
+			"<div class='mapcard' onclick='selectMap(1)'><div class='mappreview' id='mappreview1'></div><div class='mapcard-label'>Map 1<br>(default)</div></div>" +
+			"<div class='mapcard' onclick='selectMap(2)'><div class='mappreview' id='mappreview2'></div><div class='mapcard-label'>Map 2</div></div>" +
+			"<div class='mapcard' onclick='selectMap(3)'><div class='mappreview' id='mappreview3'></div><div class='mapcard-label'>Map 3</div></div>" +
 			"</div>" +
 			"<div id='custommapbar'>" +
+			"<div class='mapcard-label'>Custom map</div>" +
 			"<textarea id='custommapinput' placeholder='Paste custom map code here' ontouchstart='this.focus()'></textarea>" +
-			"<div class='mapbtn' onclick='selectMap(0)'>Custom map</div>" +
+			"<div class='mapbtn' onclick='selectMap(0)'>Use custom map</div>" +
 			"</div></div>";
 		f.style.transform = "none";
+		stopMapPreviews();
+		initMapPreview("mappreview1", DEFAULT_MAP_DATA);
+		initMapPreview("mappreview2", MAP2_DATA);
+		initMapPreview("mappreview3", MAP3_DATA);
 	}, 1000);
 }
 
 // Applies the chosen map to #trackcode, then continues into the existing
 // host() flow (game code generation, lobby, etc.) unchanged.
 selectMap = function(which){
+	stopMapPreviews();
 	var trackEl = document.getElementById("trackcode");
 	if(which == 1){
 		trackEl.innerHTML = DEFAULT_MAP_DATA;
