@@ -45,7 +45,7 @@ function getMapRecordKey(){
 	var trackHash = trackData ? hashString(trackData) : "notrack";
 	var speedMult = (typeof window.lsSpeedMult === "number") ? window.lsSpeedMult : 1;
 	var speedKey = Math.round(speedMult * 100);
-	return trackHash + "_s" + speedKey;
+	return trackHash + "_s" + speedKey + "_l" + LAPS;
 }
 
 function fmtLapTime(ms){
@@ -1752,7 +1752,7 @@ function getMapRecordKey(){
 	var trackHash = trackData ? hashString(trackData) : "notrack";
 	var speedMult = (typeof window.lsSpeedMult === "number") ? window.lsSpeedMult : 1;
 	var speedKey = Math.round(speedMult * 100);
-	return trackHash + "_s" + speedKey;
+	return trackHash + "_s" + speedKey + "_l" + LAPS;
 }
 
 function fmtLapTime(ms){
