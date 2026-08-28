@@ -82,9 +82,9 @@ chooseMapThenHost = function(){
 		f.innerHTML = "<div class='info title'>Choose a map</div>" +
 			"<div id='mapscreen'>" +
 			"<div id='mapcards'>" +
-			"<div class='mapcard' onclick='selectMap(1)'><div class='mappreview'>" + MAP1_PREVIEW_SVG + "</div><div class='mapcard-label'>Map 1<br>(default)</div></div>" +
-			"<div class='mapcard' onclick='selectMap(2)'><div class='mappreview'>" + MAP2_PREVIEW_SVG + "</div><div class='mapcard-label'>Map 2</div></div>" +
-			"<div class='mapcard' onclick='selectMap(3)'><div class='mappreview'>" + MAP3_PREVIEW_SVG + "</div><div class='mapcard-label'>Map 3</div></div>" +
+			"<div class='mapcard' onclick='selectMap(1)'><div class='mappreview'>" + MAP1_PREVIEW_SVG + "</div><div class='mapcard-label'>Solara</div></div>" +
+			"<div class='mapcard' onclick='selectMap(2)'><div class='mappreview'>" + MAP2_PREVIEW_SVG + "</div><div class='mapcard-label'>Centrix</div></div>" +
+			"<div class='mapcard' onclick='selectMap(3)'><div class='mappreview'>" + MAP3_PREVIEW_SVG + "</div><div class='mapcard-label'>Nexus</div></div>" +
 			"</div>" +
 			"<div id='custommapbar'>" +
 			"<textarea id='custommapinput' placeholder='Paste custom map code here' ontouchstart='this.focus()'></textarea>" +
