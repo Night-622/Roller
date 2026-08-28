@@ -21,6 +21,24 @@ var CLUTCH_FRICTION = 0.865; // Decel rate while clutch held (lower = stops fast
 
 // Count number of set bits in a bitmask (used for checkpoint progress)
 function countBits(n){ var c = 0; while(n){ c += n & 1; n >>= 1; } return c; }
+// ===== MAP RECORD KEY =====
+function hashString(str){
+	var hash = 5381;
+	for(var i = 0; i < str.length; i++){
+		hash = ((hash << 5) + hash) + str.charCodeAt(i);
+		hash = hash & hash;
+	}
+	return (hash >>> 0).toString(36);
+}
+
+function getMapRecordKey(){
+	var trackEl = document.getElementById("trackcode");
+	var trackData = trackEl ? trackEl.innerText.trim() : "";
+	var trackHash = trackData ? hashString(trackData) : "notrack";
+	var speedMult = (typeof window.lsSpeedMult === "number") ? window.lsSpeedMult : 1;
+	var speedKey = Math.round(speedMult * 100);
+	return trackHash + "_s" + speedKey;
+}
 
 function fmtLapTime(ms){
 	var m = Math.floor(ms / 60000);
@@ -63,7 +81,7 @@ function setupLapTimePanel(){
 	window._overallBestName = null;
 	window._sessionBestLap = null;
 	window._myLapSplits = window._myLapSplits || [];
-	var mapKey = (document.title || "track").replace(/[^a-zA-Z0-9_]/g, "_");
+	var mapKey = getMapRecordKey();
 	if(typeof database !== "undefined"){
 		database.ref("bestlaps/" + mapKey).once("value", function(snap){
 			var d = snap.val();
@@ -1302,7 +1320,7 @@ function join(){
 							if(!window._overallBestLap || sessionBest < window._overallBestLap){
 								window._overallBestLap = sessionBest;
 								window._overallBestName = me.data.name;
-								var mapKey = (document.title || "track").replace(/[^a-zA-Z0-9_]/g,"_");
+								var mapKey = getMapRecordKey();
 								database.ref("bestlaps/" + mapKey).set({ lapTime: sessionBest, name: me.data.name, pcId: PC_ID, timestamp: Date.now() });
 								if(ltOverall) ltOverall.textContent = "RECORD  " + fmtLapTime(sessionBest) + "  (" + me.data.name + ")";
 							}
