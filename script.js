@@ -1411,7 +1411,7 @@ function join(){
 				lbRows.innerHTML = html;
 				
 			}
-		}else{
+		} else {
 			camera.position.set(50 * Math.sin(x), 20, 50 * Math.cos(x));
 			camera.lookAt(player.position);
 		}
