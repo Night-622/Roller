@@ -87,12 +87,14 @@ function initMapPreview(containerId, imagePath){
 	var container = document.getElementById(containerId);
 	if(!container) return;
 
+	var canvas = document.createElement("canvas");
+
 	var w = container.clientWidth || 200;
 	var h = container.clientHeight || 200;
 
-	var canvas = document.createElement("canvas");
 	canvas.width = w;
 	canvas.height = h;
+
 	canvas.style.width = "100%";
 	canvas.style.height = "100%";
 
@@ -100,9 +102,12 @@ function initMapPreview(containerId, imagePath){
 	container.appendChild(canvas);
 
 	var ctx = canvas.getContext("2d");
+
 	var img = new Image();
 
 	img.onload = function(){
+		console.log("Loaded:", imagePath);
+
 		var scale = Math.min(
 			canvas.width / img.width,
 			canvas.height / img.height
@@ -120,7 +125,7 @@ function initMapPreview(containerId, imagePath){
 	};
 
 	img.onerror = function(){
-		console.error("Could not load map image:", imagePath);
+		console.error("FAILED TO LOAD:", imagePath);
 	};
 
 	img.src = imagePath;
