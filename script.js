@@ -138,7 +138,7 @@ chooseMapThenHost = function(){
 	document.getElementById("host").onclick = null;
 	f.style.transform = "translate3d(0, -100vh, 0)";
 	setTimeout(function(){
-		f.innerHTML = "<div class='info title'>Choose a map</div>" +
+		f.innerHTML = "<div class='info title'>Choose a map (Solara is Default)</div>" +
 			"<div id='mapscreen'>" +
 			"<div id='mapcards'>" +
 			"<div class='mapcard' onclick='selectMap(1)'><div class='mappreview' id='mappreview1'></div><div class='mapcard-label'>Solara</div></div>" +
