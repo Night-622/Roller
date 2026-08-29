@@ -3605,7 +3605,8 @@ if(mobile){
 document.body.onkeydown = function(e){
 	if(e.keyCode == 73 && (e.ctrlKey || e.metaKey))
 		document.getElementById("trackcode").innerText = prompt("Track data?")
-}function buildMapPreviewGroup(trackData){
+}
+	function buildMapPreviewGroup(trackData){
 	var racedata = (trackData || "").trim().split("|")[0].trim().split(" ");
 	var material = new THREE.MeshLambertMaterial({color: new THREE.Color(0xf48342)});
 	var group = new THREE.Object3D();
@@ -7184,7 +7185,8 @@ if(mobile){
 document.body.onkeydown = function(e){
 	if(e.keyCode == 73 && (e.ctrlKey || e.metaKey))
 		document.getElementById("trackcode").innerText = prompt("Track data?")
-}function buildMapPreviewGroup(trackData){
+}
+	function buildMapPreviewGroup(trackData){
 	var racedata = (trackData || "").trim().split("|")[0].trim().split(" ");
 	var material = new THREE.MeshLambertMaterial({color: new THREE.Color(0xf48342)});
 	var group = new THREE.Object3D();
