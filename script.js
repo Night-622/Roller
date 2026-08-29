@@ -145,9 +145,9 @@ chooseMapThenHost = function(){
 			"<div class='mapcard' onclick='selectMap(2)'><div class='mappreview' id='mappreview2'></div><div class='mapcard-label'>Nexus</div></div>" +
 			"<div class='mapcard' onclick='selectMap(3)'><div class='mappreview' id='mappreview3'></div><div class='mapcard-label'>Aerion</div></div>" +
 			"</div>" +
-			"<div id='custommapbar'>" +
+			"<div id='custom map bar'>" +
 			"<div class='mapcard-label'>Custom map</div>" +
-			"<textarea id='custommapinput' placeholder='Paste custom map code here' ontouchstart='this.focus()'></textarea>" +
+			"<textarea id='custom map input' placeholder='Paste custom map code here' ontouchstart='this.focus()'></textarea>" +
 			"<div class='mapbtn' onclick='selectMap(0)'>Use custom map</div>" +
 			"</div></div>";
 		f.style.transform = "none";
