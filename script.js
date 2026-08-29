@@ -83,44 +83,47 @@ function stopMapPreviews(){
 // Renders a small, continuously-rotating 3D view of a map inside the given
 // container element (by id). Uses its own isolated scene/camera/renderer so
 // it doesn't touch the real game scene.
-function initMapPreview(containerId, trackData){
+function initMapPreview(containerId, imagePath){
 	var container = document.getElementById(containerId);
 	if(!container) return;
-	var built = buildMapPreviewGroup(trackData);
-	var w = container.clientWidth || 200, h = container.clientHeight || 200;
 
-	var pscene = new THREE.Scene();
-	var dist = built.radius * 2 + 6;
-	var camera = new THREE.PerspectiveCamera(45, w / h, 0.1, built.radius * 12 + 100);
-	camera.position.set(0, dist * 0.8, dist);
-	camera.lookAt(0, 0, 0);
+	var w = container.clientWidth || 200;
+	var h = container.clientHeight || 200;
 
-	var light = new THREE.DirectionalLight(0xffffff, 0.9);
-	light.position.set(50, 100, 50);
-	pscene.add(light);
-	pscene.add(new THREE.AmbientLight(0xffffff, 0.6));
-	pscene.add(built.group);
+	var canvas = document.createElement("canvas");
+	canvas.width = w;
+	canvas.height = h;
+	canvas.style.width = "100%";
+	canvas.style.height = "100%";
 
-	var renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
-	renderer.setSize(w, h);
-	renderer.setClearColor(0x000000, 0);
 	container.innerHTML = "";
-	container.appendChild(renderer.domElement);
+	container.appendChild(canvas);
 
-	var rafId, stopped = false;
-	function animate(){
-		if(stopped) return;
-		built.group.rotation.y += 0.008;
-		renderer.render(pscene, camera);
-		rafId = requestAnimationFrame(animate);
-	}
-	animate();
+	var ctx = canvas.getContext("2d");
+	var img = new Image();
 
-	window._mapPreviewCleanups.push(function(){
-		stopped = true;
-		cancelAnimationFrame(rafId);
-		renderer.dispose();
-	});
+	img.onload = function(){
+		var scale = Math.min(
+			canvas.width / img.width,
+			canvas.height / img.height
+		);
+
+		var width = img.width * scale;
+		var height = img.height * scale;
+
+		var x = (canvas.width - width) / 2;
+		var y = (canvas.height - height) / 2;
+
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+		ctx.drawImage(img, x, y, width, height);
+	};
+
+	img.onerror = function(){
+		console.error("Could not load map image:", imagePath);
+	};
+
+	img.src = imagePath;
 }
 
 // Shown when the host clicks "Host a game", before the game code is generated.
@@ -144,9 +147,9 @@ chooseMapThenHost = function(){
 			"</div></div>";
 		f.style.transform = "none";
 		stopMapPreviews();
-		initMapPreview("mappreview1", DEFAULT_MAP_DATA);
-		initMapPreview("mappreview2", MAP2_DATA);
-		initMapPreview("mappreview3", MAP3_DATA);
+		initMapPreview("mappreview1", "Map/Solara.png");
+		initMapPreview("mappreview2", "Map/Nexus.png");
+		initMapPreview("mappreview3", "Map/Aerion.png");
 	}, 1000);
 }
 
